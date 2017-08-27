@@ -1,0 +1,18 @@
+slackhandler:
+  listener:
+    address: "127.0.0.1"
+    port: 39231
+webhooks:
+  gitea_to_matrix:
+    slack:
+      random1: "12345678"
+      random2: "87654321"
+      longrandom: "123456789012345678901234"
+    remote:
+      push_to: "matrix_test"
+      data: "room_id_from_config"
+matrix:
+  matrix_test:
+    api_root: "https://localhost:8448/_matrix/client/r0"
+    user: ""
+    password: ""
