@@ -184,9 +184,7 @@ func (mxc *MatrixConnection) Initialize(conn_name string, api_root string, user 
 // It will prepare a message which will be passed to mxc.SendMessage().
 func (mxc *MatrixConnection) ProcessMessage(message slackmessage.SlackMessage) {
     // Prepare message body.
-    message_body := message.Text
-
-    // ToDo: attachments handling.
+    message_body := c.SendToParser(message.Username, message)
 
     // Send message.
     mxc.SendMessage(message_body)
@@ -199,7 +197,7 @@ func (mxc *MatrixConnection) SendMessage(message string) {
     // We should send notices as it is preferred behaviour for bots and
     // appservices.
     //msgStr := fmt.Sprintf(`{"msgtype": "m.text", "body": "%s", "format": "org.matrix.custom.html", "formatted_body": "%s"}`, message, message)
-    msgStr := fmt.Sprintf(`{"msgtype": "m.notice", "body": "%s"}`, message)
+    msgStr := fmt.Sprintf(`{"msgtype": "m.notice", "body": "%s", "format": "org.matrix.custom.html", "formatted_body": "%s"}`, message, message)
     reply, err := mxc.doPutRequest("/rooms/" + mxc.room_id + "/send/m.room.message/" + mxc.generateTnxId(), msgStr)
     if err != nil {
         c.Log.Fatalf("Failed to send message to room '%s' (conn: '%s'): %s", mxc.room_id, mxc.conn_name, err.Error())

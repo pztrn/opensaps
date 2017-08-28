@@ -26,6 +26,8 @@ import (
     // local
     "lab.pztrn.name/pztrn/opensaps/config"
     "lab.pztrn.name/pztrn/opensaps/context"
+    "lab.pztrn.name/pztrn/opensaps/parsers/default"
+    "lab.pztrn.name/pztrn/opensaps/parsers/gitea"
     "lab.pztrn.name/pztrn/opensaps/pushers/matrix"
     "lab.pztrn.name/pztrn/opensaps/slack"
 )
@@ -43,6 +45,10 @@ func main() {
     c.Config.LoadConfigurationFromFile()
 
     slack.New(c)
+
+    // Initialize parsers.
+    defaultparser.New(c)
+    giteaparser.New(c)
 
     // Initialize pushers.
     matrixpusher.New(c)

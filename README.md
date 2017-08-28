@@ -29,6 +29,16 @@ path. Do it like:
 opensaps -config /path/to/opensaps.yaml
 ```
 
+# About hooks and parsers
+
+While configuring a webhook in your application, please, set username
+exactly same as one of parsers in ``parsers`` directory! Otherwise parser
+"default" will be used, which will just concatenate text and attachments
+into one message!
+
+Also note - that nickname will be ignored while sending message to
+pushers.
+
 ----
 
 # IMPORTANT NOTICE

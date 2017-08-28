@@ -20,9 +20,11 @@ package context
 import (
     // stdlib
     "os"
+    "strings"
 
     // local
     "lab.pztrn.name/pztrn/opensaps/config/interface"
+    "lab.pztrn.name/pztrn/opensaps/parsers/interface"
     "lab.pztrn.name/pztrn/opensaps/pushers/interface"
     "lab.pztrn.name/pztrn/opensaps/slack/apiserverinterface"
     "lab.pztrn.name/pztrn/opensaps/slack/message"
@@ -36,11 +38,13 @@ type Context struct {
     Config configurationinterface.ConfigurationInterface
     Flagger *flagger.Flagger
     Log *mogrus.LoggerHandler
+    Parsers map[string]parserinterface.ParserInterface
     Pushers map[string]pusherinterface.PusherInterface
     SlackAPIServer slackapiserverinterface.SlackAPIServerInterface
 }
 
 func (c *Context) Initialize() {
+    c.Parsers = make(map[string]parserinterface.ParserInterface)
     c.Pushers = make(map[string]pusherinterface.PusherInterface)
 
     l := mogrus.New()
@@ -58,6 +62,12 @@ func (c *Context) RegisterConfigurationInterface(ci configurationinterface.Confi
     c.Config.Initialize()
 }
 
+// Registers parser interface.
+func (c *Context) RegisterParserInterface(name string, iface parserinterface.ParserInterface) {
+    c.Parsers[name] = iface
+    c.Parsers[name].Initialize()
+}
+
 // Registers Pusher interface.
 func (c *Context) RegisterPusherInterface(name string, iface pusherinterface.PusherInterface) {
     c.Pushers[name] = iface
@@ -69,6 +79,16 @@ func (c *Context) RegisterPusherInterface(name string, iface pusherinterface.Pus
 func (c *Context) RegisterSlackAPIServerInterface(sasi slackapiserverinterface.SlackAPIServerInterface) {
     c.SlackAPIServer = sasi
     c.SlackAPIServer.Initialize()
+}
+
+func (c *Context) SendToParser(name string, message slackmessage.SlackMessage) string {
+    parser, found := c.Parsers[strings.ToLower(name)]
+    if !found {
+        c.Log.Errorf("Parser '%s' not found, will use default one!", name)
+        return c.Parsers["default"].ParseMessage(message)
+    }
+
+    return parser.ParseMessage(message)
 }
 
 func (c *Context) SendToPusher(protocol string, connection string, data slackmessage.SlackMessage) {
