@@ -40,6 +40,13 @@ const (
     letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
 )
 
+type MatrixMessage struct {
+    MsgType             string      `json:"msgtype"`
+    Body                string      `json:"body"`
+    Format              string      `json:"format"`
+    FormattedBody       string      `json:"formatted_body"`
+}
+
 type MatrixConnection struct {
     // API root for connection.
     api_root string
@@ -291,7 +298,19 @@ func (mxc *MatrixConnection) SendMessage(message string) {
     // We should send notices as it is preferred behaviour for bots and
     // appservices.
     //msgStr := fmt.Sprintf(`{"msgtype": "m.text", "body": "%s", "format": "org.matrix.custom.html", "formatted_body": "%s"}`, message, message)
-    msgStr := fmt.Sprintf(`{"msgtype": "m.notice", "body": "%s", "format": "org.matrix.custom.html", "formatted_body": "%s"}`, message, message)
+    msg := MatrixMessage{}
+    msg.MsgType = "m.notice"
+    msg.Body = message
+    msg.Format = "org.matrix.custom.html"
+    msg.FormattedBody = message
+
+    msgBytes, err := json.Marshal(&msg)
+    if err != nil {
+        c.Log.Errorln("Failed to marshal message into JSON:", err.Error())
+        return
+    }
+    msgStr := string(msgBytes)
+
     reply, err := mxc.doPutRequest("/rooms/" + mxc.room_id + "/send/m.room.message/" + mxc.generateTnxId(), msgStr)
     if err != nil {
         c.Log.Fatalf("Failed to send message to room '%s' (conn: '%s'): %s", mxc.room_id, mxc.conn_name, err.Error())
