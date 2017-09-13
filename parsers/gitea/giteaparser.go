@@ -61,7 +61,7 @@ func (gp GiteaParser) cutHeaderLinks(data string) [][]string {
     var links [][]string
     c.Log.Debugln("Passed:", data)
 
-    r := regexp.MustCompile("<(http[?s]://[a-zA-Z1-9./-]+)|([a-zA-Z1-9_-]+)>")
+    r := regexp.MustCompile("<(http[?s]://[a-zA-Z0-9./-]+)|([a-zA-Z0-9_-]+)>")
 
     found := r.FindAllStringSubmatch(data, -1)
 
