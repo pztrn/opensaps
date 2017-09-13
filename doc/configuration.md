@@ -28,7 +28,6 @@ define webhook name (**should be unique!**) and some parameters.
 
   **WARNING:** multiline webhook names wasn't tested! Try to keep
   your text in single line!
-
     * ``slack`` - namespace for configuring Slack API parameters.
     URL for Slack webhook looks like:
 
@@ -61,7 +60,6 @@ define webhook name (**should be unique!**) and some parameters.
 
   **WARNING:** multiline webhook names wasn't tested! Try to keep
   your text in single line!
-
     * ``api_root`` - API root for Matrix connection. For example,
     ``https://localhost:8448/_matrix/client/r0``.
 
