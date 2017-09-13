@@ -26,6 +26,8 @@ import (
     "fmt"
     "io/ioutil"
     "net/http"
+    "strconv"
+    "strings"
 
     // local
     "lab.pztrn.name/pztrn/opensaps/slack/message"
@@ -184,10 +186,102 @@ func (mxc *MatrixConnection) Initialize(conn_name string, api_root string, user 
 // It will prepare a message which will be passed to mxc.SendMessage().
 func (mxc *MatrixConnection) ProcessMessage(message slackmessage.SlackMessage) {
     // Prepare message body.
-    message_body := c.SendToParser(message.Username, message)
+    message_data := c.SendToParser(message.Username, message)
+
+    // Get message template.
+    msg_tpl := message_data["message"]
+    delete(message_data, "message")
+
+    // Repeatables.
+    var repeatables []string
+    repeatables_raw, repeatables_found := message_data["repeatables"]
+    if repeatables_found {
+        repeatables = strings.Split(repeatables_raw, ",")
+        c.Log.Debugln("Repeatable keys:", repeatables, ", length:", len(repeatables))
+    }
+
+    // Process keys.
+    for key, value := range message_data {
+        // Do nothing for keys with "_url" appendix.
+        if strings.Contains(key, "_url") {
+            c.Log.Debugln("_url key found in pre-stage, skipping:", key)
+            continue
+        }
+        // Do nothing (yet) on repeatables.
+        if strings.Contains(key, "repeatable") {
+            c.Log.Debugln("Key containing 'repeatable' in pre-stage, skipping:", key)
+            continue
+        }
+
+        if len(repeatables) > 0 {
+            if strings.Contains(key, "repeatable_item_") {
+                c.Log.Debugln("Repeatable key in pre-stage, skipping:", key)
+                continue
+            }
+        }
+        c.Log.Debugln("Processing message data key:", key)
+
+        // Check if we have an item with "_url" appendix. This means
+        // that we should generate a link.
+        val_url, found := message_data[key + "_url"]
+        // Generate a link and put into message if key with "_url"
+        // was found.
+        var s string = ""
+        if found {
+            c.Log.Debugln("Found _url key, will create HTML link")
+            s = fmt.Sprintf("<a href='%s'>%s</a>", val_url, value)
+        } else {
+            c.Log.Debugln("Found no _url key, will use as-is")
+            s = value
+        }
+        msg_tpl = strings.Replace(msg_tpl, "{" + key + "}", s, -1)
+    }
+
+    // Process repeatables.
+    repeatable_tpl, repeatable_found := message_data["repeatable_message"]
+    if repeatable_found {
+        var repeatables_string string = ""
+        repeatables_count, _ := strconv.Atoi(message_data["repeatables_count"])
+        idx := 0
+        for {
+            if (idx == repeatables_count) {
+                c.Log.Debug("IDX goes above repeatables_count, breaking loop")
+                break
+            }
+
+            var repstring string = repeatable_tpl
+            for i := range repeatables {
+                c.Log.Debugln("Processing repeatable variable:", repeatables[i] + strconv.Itoa(idx))
+                var data string = ""
+                rdata := message_data["repeatable_item_" + repeatables[i] + strconv.Itoa(idx)]
+                rurl, rurl_found := message_data["repeatable_item_" + repeatables[i] + strconv.Itoa(idx) + "_url"]
+                if rurl_found {
+                    c.Log.Debugln("Found _url key, will create HTML link")
+                    data = fmt.Sprintf("<a href='%s'>%s</a>", rurl, rdata)
+                } else {
+                    c.Log.Debugln("Found no _url key, will use as-is")
+                    data = rdata
+                }
+                repstring = strings.Replace(repstring, "{" + repeatables[i] + "}", data, -1)
+            }
+
+            repeatables_string += repstring
+            c.Log.Debugln("Repeatable string:", repstring)
+            idx += 1
+        }
+
+        msg_tpl = strings.Replace(msg_tpl, "{repeatables}", repeatables_string, -1)
+    }
+
+    msg_tpl = strings.Replace(msg_tpl, "{newline}", "<br />", -1)
+
+    // Replace all "\n" with "<br />".
+    msg_tpl = strings.Replace(msg_tpl, "\n", "<br />", -1)
+
+    c.Log.Debugln("Crafted message:", msg_tpl)
 
     // Send message.
-    mxc.SendMessage(message_body)
+    mxc.SendMessage(msg_tpl)
 }
 
 // This function sends already prepared message to room.

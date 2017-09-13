@@ -23,6 +23,7 @@ import (
     "fmt"
     "io/ioutil"
     "net/http"
+    "net/url"
     "strings"
 
     // local
@@ -57,12 +58,30 @@ func (sh SlackHandler) ServeHTTP(respwriter http.ResponseWriter, req *http.Reque
         if strings.Contains(url_splitted[2], config.Slack.Random1) && strings.Contains(url_splitted[3], config.Slack.Random2) && strings.Contains(url_splitted[4], config.Slack.LongRandom) {
             c.Log.Debugf("Passed data belongs to '%s' and should go to '%s' pusher, protocol '%s'", name, config.Remote.PushTo, config.Remote.Pusher)
             // Parse message into SlackMessage structure.
+            if strings.Contains(string(body)[0:7], "payload") {
+                // We have HTTP form payload. It still should be a
+                // parseable JSON string, we just need to do some
+                // preparations.
+                // First - remove "payload=" from the beginning.
+                temp_body := string(body)
+                temp_body = strings.Replace(temp_body, "payload=", "", 1)
+                // Second - unescape data.
+                temp_body, err := url.QueryUnescape(temp_body)
+                if err != nil {
+                    c.Log.Errorln("Failed to decode body into parseable string!")
+                    return
+                }
+
+                // And finally - convert body back to bytes.
+                body = []byte(temp_body)
+            }
             slackmsg := slackmessage.SlackMessage{}
             err := json.Unmarshal(body, &slackmsg)
             if err != nil {
                 c.Log.Error("Failed to decode JSON into SlackMessage struct: '%s'", err.Error())
                 return
             }
+            c.Log.Debug("Received message:", fmt.Sprintf("%+v", slackmsg))
             c.SendToPusher(config.Remote.Pusher, config.Remote.PushTo, slackmsg)
             sent_to_pusher = true
         }

@@ -15,23 +15,20 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-package defaultparser
+package gitlabparser
 
 import (
     // local
-    "lab.pztrn.name/pztrn/opensaps/slack/message"
+    "lab.pztrn.name/pztrn/opensaps/context"
+    "lab.pztrn.name/pztrn/opensaps/parsers/interface"
 )
 
-type DefaultParser struct {}
+var (
+    c *context.Context
+)
 
-func (dp DefaultParser) Initialize() {
-    c.Log.Infoln("Initializing default parser...")
-}
-
-func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[string]string {
-    c.Log.Debugln("Parsing default message...")
-
-    data := make(map[string]string)
-    data["message"] = message.Text
-    return data
+func New(cc *context.Context) {
+    c = cc
+    gp := GitlabParser{}
+    c.RegisterParserInterface("gitlab", parserinterface.ParserInterface(gp))
 }

@@ -24,5 +24,5 @@ import (
 
 type ParserInterface interface {
     Initialize()
-    ParseMessage(message slackmessage.SlackMessage) string
+    ParseMessage(message slackmessage.SlackMessage) map[string]string
 }

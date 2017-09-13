@@ -21,6 +21,7 @@ import (
     // stdlib
     "fmt"
     "regexp"
+    "strconv"
     "strings"
 
     // local
@@ -79,31 +80,49 @@ func (gp GiteaParser) cutHeaderLinks(data string) [][]string {
     return links
 }
 
-func (gp GiteaParser) ParseMessage(message slackmessage.SlackMessage) string {
-    c.Log.Debugln("Parsing Gitea message...")
-
-    var msg string = ""
+func (gp GiteaParser) parseCommitNew(message slackmessage.SlackMessage) map[string]string {
+    data := make(map[string]string)
+    data["message"] = "[Repo: {repo} | Branch: {branch}] {header_message}{newline}{repeatables}"
 
     // Parse header.
     // [0] is repo, [1] is branch.
     header_data := gp.cutHeaderLinks(message.Text)
-
-    msg += fmt.Sprintf("[Repo: <a href='%s'>%s</a> | Branch: <a href='%s'>%s</a>] ", header_data[0][0], header_data[0][1], header_data[1][0], header_data[1][1])
+    data["repo"] = header_data[0][1]
+    data["repo_url"] = header_data[0][0]
+    data["branch"] = header_data[1][1]
+    data["branch_url"] = header_data[1][0]
 
     header_msg := strings.Split(message.Text, "] ")[1]
-    msg += header_msg + "<br />"
+    data["header_message"] = header_msg
 
     // Parse commits.
+    data["repeatable_message"] = "{commit}: {message}{newline}"
+    data["repeatables"] = "commit,message"
+    idx := 0
     for i := range message.Attachments {
-        // Commit link.
         attachment_link := gp.cutCommitLink(message.Attachments[i].Text)
-        msg += fmt.Sprintf("<a href='%s'>%s</a>: ", attachment_link[0][0], attachment_link[0][1])
-        // Commit author and message.
-        authormsg := strings.Split(message.Attachments[i].Text, ">: ")[1]
-        msg += authormsg + "<br />"
+        data["repeatable_item_commit" + strconv.Itoa(idx)] = attachment_link[0][1]
+        data["repeatable_item_commit" + strconv.Itoa(idx) + "_url"] = attachment_link[0][0]
+        data["repeatable_item_message" + strconv.Itoa(idx)] = strings.Split(message.Attachments[i].Text, ">: ")[1]
+
+        idx += 1
+    }
+    data["repeatables_count"] = strconv.Itoa(idx)
+
+    return data
+}
+
+func (gp GiteaParser) ParseMessage(message slackmessage.SlackMessage) map[string]string {
+    c.Log.Debugln("Parsing Gitea message...")
+
+    var data map[string]string
+    if strings.Contains(message.Text, "new commit pushed by ") {
+        data = gp.parseCommitNew(message)
+    } else {
+        return map[string]string{"message": "Unknown message type:<br />" + fmt.Sprintf("%+v", message)}
     }
 
-    c.Log.Debugln("Message:", msg)
+    c.Log.Debugln("Message:", fmt.Sprintf("%+x", data))
 
-    return msg
+    return data
 }

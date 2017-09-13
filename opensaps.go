@@ -28,6 +28,7 @@ import (
     "lab.pztrn.name/pztrn/opensaps/context"
     "lab.pztrn.name/pztrn/opensaps/parsers/default"
     "lab.pztrn.name/pztrn/opensaps/parsers/gitea"
+    "lab.pztrn.name/pztrn/opensaps/parsers/gitlab"
     "lab.pztrn.name/pztrn/opensaps/pushers/matrix"
     "lab.pztrn.name/pztrn/opensaps/slack"
 )
@@ -49,6 +50,7 @@ func main() {
     // Initialize parsers.
     defaultparser.New(c)
     giteaparser.New(c)
+    gitlabparser.New(c)
 
     // Initialize pushers.
     matrixpusher.New(c)
