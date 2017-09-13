@@ -116,7 +116,7 @@ func (gp GiteaParser) ParseMessage(message slackmessage.SlackMessage) map[string
     c.Log.Debugln("Parsing Gitea message...")
 
     var data map[string]string
-    if strings.Contains(message.Text, "new commit pushed by ") {
+    if strings.Contains(message.Text, "new commit") && strings.Contains(message.Text, "pushed by ") {
         data = gp.parseCommitNew(message)
     } else {
         return map[string]string{"message": "Unknown message type:<br />" + fmt.Sprintf("%+v", message)}
