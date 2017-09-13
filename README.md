@@ -29,6 +29,8 @@ path. Do it like:
 opensaps -config /path/to/opensaps.yaml
 ```
 
+There is some documentation available - check out ``doc`` directory!
+
 # About hooks and parsers
 
 While configuring a webhook in your application, please, set username
