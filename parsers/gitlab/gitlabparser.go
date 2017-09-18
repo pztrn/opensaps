@@ -30,6 +30,25 @@ import (
 
 type GitlabParser struct {}
 
+func (gp GitlabParser) cutLinks(data string) [][]string {
+    r := regexp.MustCompile("((https??://[a-zA-Z0-9.#!*/ _-]+)\\|([a-zA-Z0-9.#!*/ _-]+))")
+
+    found := r.FindAllStringSubmatch(data, -1)
+
+    // [i][0] - link
+    // [i][1] - string for link
+    var result [][]string
+    for i := range found {
+        res := make([]string, 0, 2)
+        res = append(res, found[i][2])
+        res = append(res, found[i][3])
+        result = append(result, res)
+    }
+
+    c.Log.Debugln("Links cutted:", result)
+    return result
+}
+
 func (gp GitlabParser) Initialize() {
     c.Log.Infoln("Initializing Gitlab parser...")
 }
@@ -40,7 +59,7 @@ func (gp GitlabParser) parseCommit(message slackmessage.SlackMessage) map[string
     data["user"] = strings.TrimSpace(strings.Split(message.Text, "pushed to")[0])
 
     // Parse links.
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["branch"] = links_data[0][1]
     data["branch_url"] = links_data[0][0]
     data["repo"] = links_data[1][1]
@@ -53,7 +72,7 @@ func (gp GitlabParser) parseCommit(message slackmessage.SlackMessage) map[string
     data["repeatables"] = "commit,commit_text"
     idx := 0
     for i := range message.Attachments {
-        commit_data := gp.parseIssueCommentLink(message.Attachments[i].Text)
+        commit_data := gp.cutLinks(message.Attachments[i].Text)
         data["repeatable_item_commit" + strconv.Itoa(idx)] = commit_data[0][1]
         data["repeatable_item_commit" + strconv.Itoa(idx) + "_url"] = commit_data[0][0]
         data["repeatable_item_commit_text" + strconv.Itoa(idx)] = strings.Split(message.Attachments[i].Text, ">: ")[1]
@@ -94,7 +113,7 @@ func (gp GitlabParser) parseIssueClosed(text string) map[string]string {
     // Parse links.
     // Same as for parseIssueComment because this regexp returns
     // needed data.
-    links_data := gp.parseIssueCommentLink(text)
+    links_data := gp.cutLinks(text)
     data["project"] = links_data[0][1]
     data["project_url"] = links_data[0][0]
     data["issue"] = links_data[1][1]
@@ -109,7 +128,7 @@ func (gp GitlabParser) parseIssueComment(message slackmessage.SlackMessage) map[
     data["user"] = strings.TrimSpace(strings.Split(message.Text, " <")[0])
 
     // Parse links in main message.
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["commented_on_issue"] = links_data[0][1]
     data["commented_on_issue_url"] = links_data[0][0]
     data["project"] = links_data[1][1]
@@ -129,30 +148,11 @@ func (gp GitlabParser) parseIssueComment(message slackmessage.SlackMessage) map[
     return data
 }
 
-func (gp GitlabParser) parseIssueCommentLink(data string) [][]string {
-    r := regexp.MustCompile("((htt[?p|ps]://[a-zA-Z0-9.#!*/ _-]+)\\|([a-zA-Z0-9.#!*/ _-]+))")
-
-    found := r.FindAllStringSubmatch(data, -1)
-
-    // [i][0] - link
-    // [i][1] - string for link
-    var result [][]string
-    for i := range found {
-        res := make([]string, 0, 2)
-        res = append(res, found[i][2])
-        res = append(res, found[i][3])
-        result = append(result, res)
-    }
-
-    c.Log.Debugln("Links cutted:", result)
-    return result
-}
-
 func (gp GitlabParser) parseIssueOpened(message slackmessage.SlackMessage) map[string]string {
     data := make(map[string]string)
     data["message"] = "[{project}] {user} opened an issue: {issue}{newline}{issue_text}"
 
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["project"] = links_data[0][1]
     data["project_url"] = links_data[0][0]
     data["user"] = strings.Split(message.Text, "Issue opened by ")[1]
@@ -179,7 +179,7 @@ func (gp GitlabParser) parseMergeRequestClosed(message slackmessage.SlackMessage
     data["message"] = "[{project}] {user} closed merge request: {merge_request}"
     data["user"] = strings.Split(message.Text, " closed <")[0]
 
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["project"] = links_data[1][1]
     data["project_url"] = links_data[1][0]
     data["merge_request"] = links_data[0][1]
@@ -194,7 +194,7 @@ func (gp GitlabParser) parseMergeRequestComment(message slackmessage.SlackMessag
     data["user"] = strings.TrimSpace(strings.Split(message.Text, " <")[0])
 
     // Parse links in main message.
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["commented_on_merge_request"] = links_data[0][1]
     data["commented_on_merge_request_url"] = links_data[0][0]
     data["project"] = links_data[1][1]
@@ -219,7 +219,7 @@ func (gp GitlabParser) parseMergeRequestMerged(message slackmessage.SlackMessage
     data["message"] = "[{project}] {user} merged {merge_request}"
     data["user"] = strings.Split(message.Text, " merged <")[0]
 
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["project"] = links_data[1][1]
     data["project_url"] = links_data[1][0]
     data["merge_request"] = links_data[0][1]
@@ -234,7 +234,7 @@ func (gp GitlabParser) parseMergeRequestOpened(message slackmessage.SlackMessage
     data["message"] = "[{project}] {user} opened new merge request: {merge_request}"
     data["user"] = strings.Split(message.Text, " opened <")[0]
 
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["project"] = links_data[1][1]
     data["project_url"] = links_data[1][0]
     data["merge_request"] = links_data[0][1]
@@ -275,7 +275,7 @@ func (gp GitlabParser) parsePushedNewBranch(message slackmessage.SlackMessage) m
     data := make(map[string]string)
     data["message"] = "[{project}] {user} pushed new branch: {branch}"
 
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["branch"] = links_data[0][1]
     data["branch_url"] = links_data[0][0]
     data["project"] = links_data[1][1]
@@ -291,7 +291,7 @@ func (gp GitlabParser) parseTagPush(message slackmessage.SlackMessage) map[strin
     data["message"] = "[{project}] {user} pushed new tag: {tag}"
     data["user"] = strings.Split(message.Text, " pushed new tag")[0]
 
-    links_data := gp.parseIssueCommentLink(message.Text)
+    links_data := gp.cutLinks(message.Text)
     data["tag"] = links_data[0][1]
     data["tag_url"] = links_data[0][0]
     data["project"] = links_data[1][1]

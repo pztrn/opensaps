@@ -34,50 +34,25 @@ func (gp GiteaParser) Initialize() {
     c.Log.Infoln("Initializing Gitea parser...")
 }
 
-func (gp GiteaParser) cutCommitLink(data string) [][]string {
-    var links [][]string
+func (gp GiteaParser) cutLinks(data string) [][]string {
     c.Log.Debugln("Passed:", data)
 
-    r := regexp.MustCompile("(http[?s]://[a-zA-Z1-9./-]+)|([a-zA-Z1-9]+)>")
+    r := regexp.MustCompile("((https??://[a-zA-Z0-9.#!*/ _-]+)\\|([a-zA-Z0-9.#!*/ _-]+))")
 
     found := r.FindAllStringSubmatch(data, -1)
 
-    var result []string
+    // [i][0] - link
+    // [i][1] - string for link
+    var result [][]string
     for i := range found {
-        if i%2 == 0 {
-            result = make([]string, 0, 2)
-            result = append(result, found[i][1])
-        } else {
-            result = append(result, found[i][2])
-            links = append(links, result)
-        }
+        res := make([]string, 0, 2)
+        res = append(res, found[i][2])
+        res = append(res, found[i][3])
+        result = append(result, res)
     }
 
-    c.Log.Debugln("Links cutted:", links)
-    return links
-}
-
-func (gp GiteaParser) cutHeaderLinks(data string) [][]string {
-    var links [][]string
-    c.Log.Debugln("Passed:", data)
-
-    r := regexp.MustCompile("<(http[?s]://[a-zA-Z0-9./-]+)|([a-zA-Z0-9_-]+)>")
-
-    found := r.FindAllStringSubmatch(data, -1)
-
-    var result []string
-    for i := range found {
-        if i%2 == 0 {
-            result = make([]string, 0, 2)
-            result = append(result, found[i][1])
-        } else {
-            result = append(result, found[i][2])
-            links = append(links, result)
-        }
-    }
-
-    c.Log.Debugln("Links cutted:", links)
-    return links
+    c.Log.Debugln("Links cutted:", result)
+    return result
 }
 
 func (gp GiteaParser) parseCommitNew(message slackmessage.SlackMessage) map[string]string {
@@ -86,7 +61,7 @@ func (gp GiteaParser) parseCommitNew(message slackmessage.SlackMessage) map[stri
 
     // Parse header.
     // [0] is repo, [1] is branch.
-    header_data := gp.cutHeaderLinks(message.Text)
+    header_data := gp.cutLinks(message.Text)
     data["repo"] = header_data[0][1]
     data["repo_url"] = header_data[0][0]
     data["branch"] = header_data[1][1]
@@ -100,7 +75,7 @@ func (gp GiteaParser) parseCommitNew(message slackmessage.SlackMessage) map[stri
     data["repeatables"] = "commit,message"
     idx := 0
     for i := range message.Attachments {
-        attachment_link := gp.cutCommitLink(message.Attachments[i].Text)
+        attachment_link := gp.cutLinks(message.Attachments[i].Text)
         data["repeatable_item_commit" + strconv.Itoa(idx)] = attachment_link[0][1]
         data["repeatable_item_commit" + strconv.Itoa(idx) + "_url"] = attachment_link[0][0]
         data["repeatable_item_message" + strconv.Itoa(idx)] = strings.Split(message.Attachments[i].Text, ">: ")[1]
