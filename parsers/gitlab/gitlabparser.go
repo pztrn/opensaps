@@ -243,6 +243,34 @@ func (gp GitlabParser) parseMergeRequestOpened(message slackmessage.SlackMessage
     return data
 }
 
+func (gp GitlabParser) parsePipelineMessage(message slackmessage.SlackMessage) map[string]string {
+    data := make(map[string]string)
+    data["message"] = "[{project}] Pipeline {pipeline_number} of branch {branch} by {user} {status} in {time}"
+
+    var status string = ""
+    if strings.Contains(message.Attachments[0], "failed") {
+        status = "failed"
+    } else if strings.Contains(message.Attachments[0], "passed") {
+        status = "passed"
+    }
+
+    data["status"] = status
+
+    user := strings.Split(message.Attachments[0], "> by ")[1]
+    data["user"] = strings.Split(user, " " + status + " in")[0]
+    data["time"] = strings.Split(message.Attachments[0], " " + status + " in ")[1]
+
+    links_data := gp.parseCommitLinks(message.Attachments[0])
+    data["project"] = links_data[0][1]
+    data["project_url"] = links_data[0][0]
+    data["pipeline_number"] = links_data[1][1]
+    data["pipeline_number_url"] = links_data[1][0]
+    data["branch"] = links_data[2][1]
+    data["branch_url"] = links_data[2][0]
+
+    return data
+}
+
 func (gp GitlabParser) parsePushedNewBranch(message slackmessage.SlackMessage) map[string]string {
     data := make(map[string]string)
     data["message"] = "[{project}] {user} pushed new branch: {branch}"
@@ -276,6 +304,11 @@ func (gp GitlabParser) ParseMessage(message slackmessage.SlackMessage) map[strin
     c.Log.Debugln("Parsing Gitlab message...")
 
     var data map[string]string
+
+    if strings.Contains(message.Attachments[0], "Pipeline") && strings.Contains(message.Attachments[0], "of branch") {
+        data = gp.parsePipelineMessage(message)
+    }
+
     if strings.Contains(message.Text, "pushed to") {
         data = gp.parseCommit(message)
     } else if strings.Contains(message.Text, "commented on issue") {
