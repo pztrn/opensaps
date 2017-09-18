@@ -300,15 +300,24 @@ func (gp GitlabParser) parseTagPush(message slackmessage.SlackMessage) map[strin
     return data
 }
 
+func (gp GitlabParser) parseAttachments(message slackmessage.SlackMessage) map[string]string {
+    c.Log.Debugln("Parsing attachments...")
+
+    var data map[string]string
+    if strings.Contains(message.Attachments[0].Text, "Pipeline") && strings.Contains(message.Attachments[0].Text, "of branch") {
+        data = gp.parsePipelineMessage(message)
+    }
+
+    return data
+}
+
 func (gp GitlabParser) ParseMessage(message slackmessage.SlackMessage) map[string]string {
     c.Log.Debugln("Parsing Gitlab message...")
 
     var data map[string]string
 
-    if len(message.Attachments) > 0 {
-        if strings.Contains(message.Attachments[0].Text, "Pipeline") && strings.Contains(message.Attachments[0].Text, "of branch") {
-            data = gp.parsePipelineMessage(message)
-        }
+    if len(message.Attachments) > 0 && message.Text == "" {
+        return gp.parseAttachments(message)
     }
 
     if strings.Contains(message.Text, "pushed to") {
