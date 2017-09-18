@@ -260,7 +260,7 @@ func (gp GitlabParser) parsePipelineMessage(message slackmessage.SlackMessage) m
     data["user"] = strings.Split(user, " " + status + " in")[0]
     data["time"] = strings.Split(message.Attachments[0].Text, " " + status + " in ")[1]
 
-    links_data := gp.parseCommitLinks(message.Attachments[0].Text)
+    links_data := gp.cutLinks(message.Attachments[0].Text)
     data["project"] = links_data[0][1]
     data["project_url"] = links_data[0][0]
     data["pipeline_number"] = links_data[1][1]
