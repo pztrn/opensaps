@@ -305,8 +305,10 @@ func (gp GitlabParser) ParseMessage(message slackmessage.SlackMessage) map[strin
 
     var data map[string]string
 
-    if strings.Contains(message.Attachments[0].Text, "Pipeline") && strings.Contains(message.Attachments[0].Text, "of branch") {
-        data = gp.parsePipelineMessage(message)
+    if len(message.Attachments) > 0 {
+        if strings.Contains(message.Attachments[0].Text, "Pipeline") && strings.Contains(message.Attachments[0].Text, "of branch") {
+            data = gp.parsePipelineMessage(message)
+        }
     }
 
     if strings.Contains(message.Text, "pushed to") {
