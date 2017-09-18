@@ -248,19 +248,19 @@ func (gp GitlabParser) parsePipelineMessage(message slackmessage.SlackMessage) m
     data["message"] = "[{project}] Pipeline {pipeline_number} of branch {branch} by {user} {status} in {time}"
 
     var status string = ""
-    if strings.Contains(message.Attachments[0], "failed") {
+    if strings.Contains(message.Attachments[0].Text, "failed") {
         status = "failed"
-    } else if strings.Contains(message.Attachments[0], "passed") {
+    } else if strings.Contains(message.Attachments[0].Text, "passed") {
         status = "passed"
     }
 
     data["status"] = status
 
-    user := strings.Split(message.Attachments[0], "> by ")[1]
+    user := strings.Split(message.Attachments[0].Text, "> by ")[1]
     data["user"] = strings.Split(user, " " + status + " in")[0]
-    data["time"] = strings.Split(message.Attachments[0], " " + status + " in ")[1]
+    data["time"] = strings.Split(message.Attachments[0].Text, " " + status + " in ")[1]
 
-    links_data := gp.parseCommitLinks(message.Attachments[0])
+    links_data := gp.parseCommitLinks(message.Attachments[0].Text)
     data["project"] = links_data[0][1]
     data["project_url"] = links_data[0][0]
     data["pipeline_number"] = links_data[1][1]
@@ -305,7 +305,7 @@ func (gp GitlabParser) ParseMessage(message slackmessage.SlackMessage) map[strin
 
     var data map[string]string
 
-    if strings.Contains(message.Attachments[0], "Pipeline") && strings.Contains(message.Attachments[0], "of branch") {
+    if strings.Contains(message.Attachments[0].Text, "Pipeline") && strings.Contains(message.Attachments[0].Text, "of branch") {
         data = gp.parsePipelineMessage(message)
     }
 
