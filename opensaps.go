@@ -18,53 +18,55 @@
 package main
 
 import (
-    // stdlib
-    "os"
-    "os/signal"
-    "syscall"
+	// stdlib
+	"os"
+	"os/signal"
+	"syscall"
 
-    // local
-    "lab.pztrn.name/pztrn/opensaps/config"
-    "lab.pztrn.name/pztrn/opensaps/context"
-    "lab.pztrn.name/pztrn/opensaps/parsers/default"
-    "lab.pztrn.name/pztrn/opensaps/parsers/gitea"
-    "lab.pztrn.name/pztrn/opensaps/parsers/gitlab"
-    "lab.pztrn.name/pztrn/opensaps/pushers/matrix"
-    "lab.pztrn.name/pztrn/opensaps/slack"
+	// local
+	"lab.pztrn.name/pztrn/opensaps/config"
+	"lab.pztrn.name/pztrn/opensaps/context"
+	"lab.pztrn.name/pztrn/opensaps/parsers/default"
+	"lab.pztrn.name/pztrn/opensaps/parsers/gitea"
+	"lab.pztrn.name/pztrn/opensaps/parsers/gitlab"
+	"lab.pztrn.name/pztrn/opensaps/pushers/matrix"
+	"lab.pztrn.name/pztrn/opensaps/pushers/telegram"
+	"lab.pztrn.name/pztrn/opensaps/slack"
 )
 
 func main() {
-    c := context.New()
-    c.Initialize()
+	c := context.New()
+	c.Initialize()
 
-    config.New(c)
+	config.New(c)
 
-    c.Log.Infoln("Launching OpenSAPS...")
+	c.Log.Infoln("Launching OpenSAPS...")
 
-    c.Flagger.Parse()
-    c.Config.InitializeLater()
-    c.Config.LoadConfigurationFromFile()
+	c.Flagger.Parse()
+	c.Config.InitializeLater()
+	c.Config.LoadConfigurationFromFile()
 
-    slack.New(c)
+	slack.New(c)
 
-    // Initialize parsers.
-    defaultparser.New(c)
-    giteaparser.New(c)
-    gitlabparser.New(c)
+	// Initialize parsers.
+	defaultparser.New(c)
+	giteaparser.New(c)
+	gitlabparser.New(c)
 
-    // Initialize pushers.
-    matrixpusher.New(c)
+	// Initialize pushers.
+	matrixpusher.New(c)
+	telegrampusher.New(c)
 
-    // CTRL+C handler.
-    signal_handler := make(chan os.Signal, 1)
-    shutdown_done := make(chan bool, 1)
-    signal.Notify(signal_handler, os.Interrupt, syscall.SIGTERM)
-    go func() {
-        <-signal_handler
-        c.Shutdown()
-        shutdown_done <- true
-    }()
+	// CTRL+C handler.
+	signal_handler := make(chan os.Signal, 1)
+	shutdown_done := make(chan bool, 1)
+	signal.Notify(signal_handler, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-signal_handler
+		c.Shutdown()
+		shutdown_done <- true
+	}()
 
-    <-shutdown_done
-    os.Exit(0)
+	<-shutdown_done
+	os.Exit(0)
 }

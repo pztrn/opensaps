@@ -10,9 +10,21 @@ webhooks:
     remote:
       pusher: "matrix"
       push_to: "matrix_test"
+  gitea_to_telegram:
+    slack:
+      random1: "87654321"
+      random2: "12345678"
+      longrandom: "432109876543210987654321"
+    remote:
+      pusher: "telegram"
+      push_to: "telegram_test"
 matrix:
   matrix_test:
     api_root: "https://localhost:8448/_matrix/client/r0"
     user: ""
     password: ""
     room: "!roomid:server.tld"
+telegram:
+  telegram_test:
+    bot_id: "bot:id"
+    chat_id: "chat_id or -chat_id"
