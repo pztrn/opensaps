@@ -50,7 +50,7 @@ func (c *Context) Initialize() {
 	l := mogrus.New()
 	l.Initialize()
 	c.Log = l.CreateLogger("opensaps")
-	c.Log.CreateOutput("stdout", os.Stdout, true)
+	c.Log.CreateOutput("stdout", os.Stdout, true, "debug")
 
 	c.Flagger = flagger.New(c.Log)
 	c.Flagger.Initialize()
