@@ -18,22 +18,22 @@
 package slack
 
 import (
-    // stdlib
-    "net/http"
+	// stdlib
+	"net/http"
 
-    // local
-    "lab.pztrn.name/pztrn/opensaps/context"
-    "lab.pztrn.name/pztrn/opensaps/slack/apiserverinterface"
+	// local
+	"source.pztrn.name/misc/opensaps/context"
+	"source.pztrn.name/misc/opensaps/slack/apiserverinterface"
 )
 
 var (
-    c *context.Context
-    // HTTP server.
-    httpsrv *http.Server
+	c *context.Context
+	// HTTP server.
+	httpsrv *http.Server
 )
 
 func New(cc *context.Context) {
-    c = cc
-    sh := SlackAPIServer{}
-    c.RegisterSlackAPIServerInterface(slackapiserverinterface.SlackAPIServerInterface(sh))
+	c = cc
+	sh := SlackAPIServer{}
+	c.RegisterSlackAPIServerInterface(slackapiserverinterface.SlackAPIServerInterface(sh))
 }

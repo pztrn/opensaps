@@ -18,17 +18,17 @@
 package defaultparser
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/context"
-    "lab.pztrn.name/pztrn/opensaps/parsers/interface"
+	// local
+	"source.pztrn.name/misc/opensaps/context"
+	"source.pztrn.name/misc/opensaps/parsers/interface"
 )
 
 var (
-    c *context.Context
+	c *context.Context
 )
 
 func New(cc *context.Context) {
-    c = cc
-    dp := DefaultParser{}
-    c.RegisterParserInterface("default", parserinterface.ParserInterface(dp))
+	c = cc
+	dp := DefaultParser{}
+	c.RegisterParserInterface("default", parserinterface.ParserInterface(dp))
 }

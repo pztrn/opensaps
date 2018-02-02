@@ -23,15 +23,15 @@ import (
 	"strings"
 
 	// local
-	"lab.pztrn.name/pztrn/opensaps/config/interface"
-	"lab.pztrn.name/pztrn/opensaps/parsers/interface"
-	"lab.pztrn.name/pztrn/opensaps/pushers/interface"
-	"lab.pztrn.name/pztrn/opensaps/slack/apiserverinterface"
-	"lab.pztrn.name/pztrn/opensaps/slack/message"
+	"source.pztrn.name/misc/opensaps/config/interface"
+	"source.pztrn.name/misc/opensaps/parsers/interface"
+	"source.pztrn.name/misc/opensaps/pushers/interface"
+	"source.pztrn.name/misc/opensaps/slack/apiserverinterface"
+	"source.pztrn.name/misc/opensaps/slack/message"
 
 	// other
-	"lab.pztrn.name/golibs/flagger"
-	"lab.pztrn.name/golibs/mogrus"
+	"source.pztrn.name/golibs/flagger"
+	"source.pztrn.name/golibs/mogrus"
 )
 
 type Context struct {

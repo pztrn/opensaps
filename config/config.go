@@ -18,110 +18,110 @@
 package config
 
 import (
-    // stdlib
-    "errors"
-    "fmt"
-    "io/ioutil"
-    "os/user"
-    "strings"
+	// stdlib
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"os/user"
+	"strings"
 
-    // local
-    "lab.pztrn.name/pztrn/opensaps/config/struct"
+	// local
+	"source.pztrn.name/misc/opensaps/config/struct"
 
-    // other
-    "gopkg.in/yaml.v2"
-    "lab.pztrn.name/golibs/flagger"
+	// other
+	"gopkg.in/yaml.v2"
+	"source.pztrn.name/golibs/flagger"
 )
 
-type Configuration struct {}
+type Configuration struct{}
 
 // Returns configuration to caller.
 func (conf Configuration) GetConfig() *configstruct.ConfigStruct {
-    return config
+	return config
 }
 
 // Gets value from temporary configuration storage.
 // If value isn't found - returns empty string with error.
 func (conf Configuration) GetTempValue(key string) (string, error) {
-    value, found := tempconfig[key]
-    if !found {
-        return "", errors.New("No such key in temporary configuration storage: " + key)
-    }
+	value, found := tempconfig[key]
+	if !found {
+		return "", errors.New("No such key in temporary configuration storage: " + key)
+	}
 
-    // If we have path with tilde in front (home directory) - replace
-    // tilde with actual home directory.
-    if value[0] == '~' {
-        usr, err := user.Current()
-        if err != nil {
-            c.Log.Fatalln("Failed to get current user data: " + err.Error())
-        }
-        value = strings.Replace(value, "~", usr.HomeDir, 1)
-    }
+	// If we have path with tilde in front (home directory) - replace
+	// tilde with actual home directory.
+	if value[0] == '~' {
+		usr, err := user.Current()
+		if err != nil {
+			c.Log.Fatalln("Failed to get current user data: " + err.Error())
+		}
+		value = strings.Replace(value, "~", usr.HomeDir, 1)
+	}
 
-    return value, nil
+	return value, nil
 }
 
 func (conf Configuration) Initialize() {
-    c.Log.Infoln("Initializing configuration storage...")
+	c.Log.Infoln("Initializing configuration storage...")
 
-    tempconfig = make(map[string]string)
+	tempconfig = make(map[string]string)
 
-    flag_configpath := flagger.Flag{
-        Name: "config",
-        Description: "Path to configuration file.",
-        Type: "string",
-        DefaultValue: "~/.config/OpenSAPS/config.yaml",
-    }
+	flag_configpath := flagger.Flag{
+		Name:         "config",
+		Description:  "Path to configuration file.",
+		Type:         "string",
+		DefaultValue: "~/.config/OpenSAPS/config.yaml",
+	}
 
-    c.Flagger.AddFlag(&flag_configpath)
+	c.Flagger.AddFlag(&flag_configpath)
 }
 
 // Initializes configuration root path for later usage.
 func (conf Configuration) initializeConfigurationFilePath() {
-    c.Log.Debugln("Asking flagger about configuration root path supplied by user...")
+	c.Log.Debugln("Asking flagger about configuration root path supplied by user...")
 
-    configpath, err := c.Flagger.GetStringValue("config")
-    if err != nil {
-        c.Log.Fatalln("Something went wrong - Flagger doesn't know about \"-config\" parameter!")
-    }
+	configpath, err := c.Flagger.GetStringValue("config")
+	if err != nil {
+		c.Log.Fatalln("Something went wrong - Flagger doesn't know about \"-config\" parameter!")
+	}
 
-    c.Log.Infoln("Will use configuration file: '" + configpath + "'")
-    conf.SetTempValue("CONFIGURATION_FILE", configpath)
+	c.Log.Infoln("Will use configuration file: '" + configpath + "'")
+	conf.SetTempValue("CONFIGURATION_FILE", configpath)
 }
 
 // Asking Flagger about flags, initialize internal variables.
 // Should be called **after** Flagger.Parse().
 func (conf Configuration) InitializeLater() {
-    c.Log.Infoln("Completing configuration initialization...")
+	c.Log.Infoln("Completing configuration initialization...")
 
-    conf.initializeConfigurationFilePath()
+	conf.initializeConfigurationFilePath()
 }
 
 // Loads configuration from file.
 func (conf Configuration) LoadConfigurationFromFile() {
-    configpath, err := conf.GetTempValue("CONFIGURATION_FILE")
-    if err != nil {
-        c.Log.Fatalln("Failed to get configuration file path from internal temporary configuration storage! OpenSAPS is BROKEN!")
-    }
-    c.Log.Infof("Loading configuration from '%s'...", configpath)
+	configpath, err := conf.GetTempValue("CONFIGURATION_FILE")
+	if err != nil {
+		c.Log.Fatalln("Failed to get configuration file path from internal temporary configuration storage! OpenSAPS is BROKEN!")
+	}
+	c.Log.Infof("Loading configuration from '%s'...", configpath)
 
-    // Read file into memory.
-    config_bytes, err1 := ioutil.ReadFile(configpath)
-    if err1 != nil {
-        c.Log.Fatalf("Error occured while reading configuration file: %s", err1.Error())
-    }
+	// Read file into memory.
+	config_bytes, err1 := ioutil.ReadFile(configpath)
+	if err1 != nil {
+		c.Log.Fatalf("Error occured while reading configuration file: %s", err1.Error())
+	}
 
-    config = &configstruct.ConfigStruct{}
-    // Parse YAML.
-    err2 := yaml.Unmarshal(config_bytes, config)
-    if err2 != nil {
-        c.Log.Fatalf("Failed to parse configuration file: %s", err2.Error())
-    }
-    c.Log.Debugln("Loaded configuration:", fmt.Sprintf("%+v", config))
+	config = &configstruct.ConfigStruct{}
+	// Parse YAML.
+	err2 := yaml.Unmarshal(config_bytes, config)
+	if err2 != nil {
+		c.Log.Fatalf("Failed to parse configuration file: %s", err2.Error())
+	}
+	c.Log.Debugln("Loaded configuration:", fmt.Sprintf("%+v", config))
 }
 
 // Sets value to key in temporary configuration storage.
 // If key already present in map - value will be replaced.
 func (conf Configuration) SetTempValue(key, value string) {
-    tempconfig[key] = value
+	tempconfig[key] = value
 }

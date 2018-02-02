@@ -18,20 +18,20 @@
 package defaultparser
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/slack/message"
+	// local
+	"source.pztrn.name/misc/opensaps/slack/message"
 )
 
-type DefaultParser struct {}
+type DefaultParser struct{}
 
 func (dp DefaultParser) Initialize() {
-    c.Log.Infoln("Initializing default parser...")
+	c.Log.Infoln("Initializing default parser...")
 }
 
 func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[string]string {
-    c.Log.Debugln("Parsing default message...")
+	c.Log.Debugln("Parsing default message...")
 
-    data := make(map[string]string)
-    data["message"] = message.Text
-    return data
+	data := make(map[string]string)
+	data["message"] = message.Text
+	return data
 }

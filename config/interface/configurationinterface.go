@@ -18,15 +18,15 @@
 package configurationinterface
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/config/struct"
+	// local
+	"source.pztrn.name/misc/opensaps/config/struct"
 )
 
 type ConfigurationInterface interface {
-    GetConfig() *configstruct.ConfigStruct
-    GetTempValue(key string) (string, error)
-    Initialize()
-    InitializeLater()
-    LoadConfigurationFromFile()
-    SetTempValue(key, value string)
+	GetConfig() *configstruct.ConfigStruct
+	GetTempValue(key string) (string, error)
+	Initialize()
+	InitializeLater()
+	LoadConfigurationFromFile()
+	SetTempValue(key, value string)
 }

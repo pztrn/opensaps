@@ -18,17 +18,17 @@
 package giteaparser
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/context"
-    "lab.pztrn.name/pztrn/opensaps/parsers/interface"
+	// local
+	"source.pztrn.name/misc/opensaps/context"
+	"source.pztrn.name/misc/opensaps/parsers/interface"
 )
 
 var (
-    c *context.Context
+	c *context.Context
 )
 
 func New(cc *context.Context) {
-    c = cc
-    gp := GiteaParser{}
-    c.RegisterParserInterface("gitea", parserinterface.ParserInterface(gp))
+	c = cc
+	gp := GiteaParser{}
+	c.RegisterParserInterface("gitea", parserinterface.ParserInterface(gp))
 }

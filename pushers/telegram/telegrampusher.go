@@ -19,7 +19,7 @@ package telegrampusher
 
 import (
 	// local
-	"lab.pztrn.name/pztrn/opensaps/slack/message"
+	"source.pztrn.name/misc/opensaps/slack/message"
 )
 
 type TelegramPusher struct{}

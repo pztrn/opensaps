@@ -18,11 +18,11 @@
 package parserinterface
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/slack/message"
+	// local
+	"source.pztrn.name/misc/opensaps/slack/message"
 )
 
 type ParserInterface interface {
-    Initialize()
-    ParseMessage(message slackmessage.SlackMessage) map[string]string
+	Initialize()
+	ParseMessage(message slackmessage.SlackMessage) map[string]string
 }

@@ -18,39 +18,39 @@
 package matrixpusher
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/slack/message"
+	// local
+	"source.pztrn.name/misc/opensaps/slack/message"
 )
 
-type MatrixPusher struct {}
+type MatrixPusher struct{}
 
 func (mp MatrixPusher) Initialize() {
-    c.Log.Infoln("Initializing Matrix protocol pusher...")
+	c.Log.Infoln("Initializing Matrix protocol pusher...")
 
-    // Get configuration for pushers and initialize every connection.
-    cfg := c.Config.GetConfig()
-    for name, config := range cfg.Matrix {
-        c.Log.Infof("Initializing connection: '%s'", name)
-        conn := MatrixConnection{}
-        connections[name] = &conn
-        go conn.Initialize(name, config.ApiRoot, config.User, config.Password, config.Room)
-    }
+	// Get configuration for pushers and initialize every connection.
+	cfg := c.Config.GetConfig()
+	for name, config := range cfg.Matrix {
+		c.Log.Infof("Initializing connection: '%s'", name)
+		conn := MatrixConnection{}
+		connections[name] = &conn
+		go conn.Initialize(name, config.ApiRoot, config.User, config.Password, config.Room)
+	}
 }
 
 func (mp MatrixPusher) Push(connection string, data slackmessage.SlackMessage) {
-    conn, found := connections[connection]
-    if !found {
-        c.Log.Errorf("Connection not found: '%s'!", connection)
-        return
-    }
-    c.Log.Debugf("Pushing data to '%s'", connection)
-    conn.ProcessMessage(data)
+	conn, found := connections[connection]
+	if !found {
+		c.Log.Errorf("Connection not found: '%s'!", connection)
+		return
+	}
+	c.Log.Debugf("Pushing data to '%s'", connection)
+	conn.ProcessMessage(data)
 }
 
 func (mp MatrixPusher) Shutdown() {
-    c.Log.Infoln("Shutting down Matrix pusher...")
+	c.Log.Infoln("Shutting down Matrix pusher...")
 
-    for _, conn := range connections {
-        conn.Shutdown()
-    }
+	for _, conn := range connections {
+		conn.Shutdown()
+	}
 }

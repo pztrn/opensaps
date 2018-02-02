@@ -18,12 +18,12 @@
 package pusherinterface
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/slack/message"
+	// local
+	"source.pztrn.name/misc/opensaps/slack/message"
 )
 
 type PusherInterface interface {
-    Initialize()
-    Push(connection string, data slackmessage.SlackMessage)
-    Shutdown()
+	Initialize()
+	Push(connection string, data slackmessage.SlackMessage)
+	Shutdown()
 }

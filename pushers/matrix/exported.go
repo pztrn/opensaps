@@ -18,20 +18,20 @@
 package matrixpusher
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/context"
-    "lab.pztrn.name/pztrn/opensaps/pushers/interface"
+	// local
+	"source.pztrn.name/misc/opensaps/context"
+	"source.pztrn.name/misc/opensaps/pushers/interface"
 )
 
 var (
-    c *context.Context
-    connections map[string]*MatrixConnection
+	c           *context.Context
+	connections map[string]*MatrixConnection
 )
 
 func New(cc *context.Context) {
-    c = cc
-    connections = make(map[string]*MatrixConnection)
+	c = cc
+	connections = make(map[string]*MatrixConnection)
 
-    mp := MatrixPusher{}
-    c.RegisterPusherInterface("matrix", pusherinterface.PusherInterface(mp))
+	mp := MatrixPusher{}
+	c.RegisterPusherInterface("matrix", pusherinterface.PusherInterface(mp))
 }

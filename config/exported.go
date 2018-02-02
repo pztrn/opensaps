@@ -18,22 +18,22 @@
 package config
 
 import (
-    // local
-    "lab.pztrn.name/pztrn/opensaps/config/interface"
-    "lab.pztrn.name/pztrn/opensaps/config/struct"
-    "lab.pztrn.name/pztrn/opensaps/context"
+	// local
+	"source.pztrn.name/misc/opensaps/config/interface"
+	"source.pztrn.name/misc/opensaps/config/struct"
+	"source.pztrn.name/misc/opensaps/context"
 )
 
 var (
-    c *context.Context
-    // Temporary configuration.
-    tempconfig map[string]string
-    // Configuration from YAML file.
-    config *configstruct.ConfigStruct
+	c *context.Context
+	// Temporary configuration.
+	tempconfig map[string]string
+	// Configuration from YAML file.
+	config *configstruct.ConfigStruct
 )
 
 func New(cc *context.Context) {
-    c = cc
-    conf := Configuration{}
-    c.RegisterConfigurationInterface(configurationinterface.ConfigurationInterface(conf))
+	c = cc
+	conf := Configuration{}
+	c.RegisterConfigurationInterface(configurationinterface.ConfigurationInterface(conf))
 }

@@ -24,14 +24,14 @@ import (
 	"syscall"
 
 	// local
-	"lab.pztrn.name/pztrn/opensaps/config"
-	"lab.pztrn.name/pztrn/opensaps/context"
-	"lab.pztrn.name/pztrn/opensaps/parsers/default"
-	"lab.pztrn.name/pztrn/opensaps/parsers/gitea"
-	"lab.pztrn.name/pztrn/opensaps/parsers/gitlab"
-	"lab.pztrn.name/pztrn/opensaps/pushers/matrix"
-	"lab.pztrn.name/pztrn/opensaps/pushers/telegram"
-	"lab.pztrn.name/pztrn/opensaps/slack"
+	"source.pztrn.name/misc/opensaps/config"
+	"source.pztrn.name/misc/opensaps/context"
+	"source.pztrn.name/misc/opensaps/parsers/default"
+	"source.pztrn.name/misc/opensaps/parsers/gitea"
+	"source.pztrn.name/misc/opensaps/parsers/gitlab"
+	"source.pztrn.name/misc/opensaps/pushers/matrix"
+	"source.pztrn.name/misc/opensaps/pushers/telegram"
+	"source.pztrn.name/misc/opensaps/slack"
 )
 
 func main() {

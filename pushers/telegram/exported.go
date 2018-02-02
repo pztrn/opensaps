@@ -19,8 +19,8 @@ package telegrampusher
 
 import (
 	// local
-	"lab.pztrn.name/pztrn/opensaps/context"
-	"lab.pztrn.name/pztrn/opensaps/pushers/interface"
+	"source.pztrn.name/misc/opensaps/context"
+	"source.pztrn.name/misc/opensaps/pushers/interface"
 )
 
 var (
