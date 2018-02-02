@@ -11,8 +11,8 @@ But it can be used for anything that provides Slack Webhooks support.
 # Installation
 
 ```
-go get -u -v -d lab.pztrn.name/pztrn/opensaps
-go install -v lab.pztrn.name/pztrn/opensaps
+go get -u -v -d source.pztrn.name/misc/opensaps
+go install -v source.pztrn.name/misc/opensaps
 ```
 
 # Configuration
