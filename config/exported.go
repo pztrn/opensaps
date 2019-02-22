@@ -19,9 +19,9 @@ package config
 
 import (
 	// local
-	"source.pztrn.name/misc/opensaps/config/interface"
-	"source.pztrn.name/misc/opensaps/config/struct"
-	"source.pztrn.name/misc/opensaps/context"
+	"gitlab.com/pztrn/opensaps/config/interface"
+	"gitlab.com/pztrn/opensaps/config/struct"
+	"gitlab.com/pztrn/opensaps/context"
 )
 
 var (

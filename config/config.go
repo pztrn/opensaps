@@ -26,7 +26,7 @@ import (
 	"strings"
 
 	// local
-	"source.pztrn.name/misc/opensaps/config/struct"
+	"gitlab.com/pztrn/opensaps/config/struct"
 
 	// other
 	"gopkg.in/yaml.v2"

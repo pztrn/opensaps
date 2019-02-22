@@ -23,11 +23,11 @@ import (
 	"strings"
 
 	// local
-	"source.pztrn.name/misc/opensaps/config/interface"
-	"source.pztrn.name/misc/opensaps/parsers/interface"
-	"source.pztrn.name/misc/opensaps/pushers/interface"
-	"source.pztrn.name/misc/opensaps/slack/apiserverinterface"
-	"source.pztrn.name/misc/opensaps/slack/message"
+	"gitlab.com/pztrn/opensaps/config/interface"
+	"gitlab.com/pztrn/opensaps/parsers/interface"
+	"gitlab.com/pztrn/opensaps/pushers/interface"
+	"gitlab.com/pztrn/opensaps/slack/apiserverinterface"
+	"gitlab.com/pztrn/opensaps/slack/message"
 
 	// other
 	"source.pztrn.name/golibs/flagger"

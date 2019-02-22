@@ -19,8 +19,8 @@ package defaultparser
 
 import (
 	// local
-	"source.pztrn.name/misc/opensaps/context"
-	"source.pztrn.name/misc/opensaps/parsers/interface"
+	"gitlab.com/pztrn/misc/opensaps/context"
+	"gitlab.com/pztrn/misc/opensaps/parsers/interface"
 )
 
 var (

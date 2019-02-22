@@ -27,7 +27,7 @@ import (
 	"strings"
 
 	// local
-	"source.pztrn.name/misc/opensaps/slack/message"
+	"gitlab.com/pztrn/opensaps/slack/message"
 )
 
 type SlackHandler struct{}

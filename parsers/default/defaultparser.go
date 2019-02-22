@@ -19,7 +19,7 @@ package defaultparser
 
 import (
 	// local
-	"source.pztrn.name/misc/opensaps/slack/message"
+	"gitlab.com/pztrn/opensaps/slack/message"
 )
 
 type DefaultParser struct{}

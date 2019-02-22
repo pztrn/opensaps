@@ -22,8 +22,8 @@ import (
 	"net/http"
 
 	// local
-	"source.pztrn.name/misc/opensaps/context"
-	"source.pztrn.name/misc/opensaps/slack/apiserverinterface"
+	"gitlab.com/pztrn/opensaps/context"
+	"gitlab.com/pztrn/opensaps/slack/apiserverinterface"
 )
 
 var (
