@@ -29,8 +29,8 @@ import (
 	"gitlab.com/pztrn/opensaps/config/struct"
 
 	// other
+	"gitlab.com/pztrn/flagger"
 	"gopkg.in/yaml.v2"
-	"source.pztrn.name/golibs/flagger"
 )
 
 type Configuration struct{}

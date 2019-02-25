@@ -30,8 +30,8 @@ import (
 	"gitlab.com/pztrn/opensaps/slack/message"
 
 	// other
-	"source.pztrn.name/golibs/flagger"
-	"source.pztrn.name/golibs/mogrus"
+	"github.com/pztrn/mogrus"
+	"gitlab.com/pztrn/flagger"
 )
 
 type Context struct {
@@ -52,7 +52,7 @@ func (c *Context) Initialize() {
 	c.Log = l.CreateLogger("opensaps")
 	c.Log.CreateOutput("stdout", os.Stdout, true, "debug")
 
-	c.Flagger = flagger.New(c.Log)
+	c.Flagger = flagger.New("opensaps", flagger.LoggerInterface(c.Log))
 	c.Flagger.Initialize()
 }
 

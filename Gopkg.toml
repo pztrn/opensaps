@@ -26,8 +26,8 @@
 
 [[constraint]]
   branch = "master"
-  name = "source.pztrn.name/golibs/flagger"
+  name = "gitlab.com/pztrn/flagger"
 
 [[constraint]]
   branch = "master"
-  name = "source.pztrn.name/golibs/mogrus"
+  name = "github.com/pztrn/mogrus"
