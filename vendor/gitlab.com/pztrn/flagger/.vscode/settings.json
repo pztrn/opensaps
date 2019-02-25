@@ -1,0 +1,6 @@
+{
+    "go.testFlags": [
+        "-cover"
+    ],
+    "go.coverageOptions": "showBothCoveredAndUncoveredCode"
+}
