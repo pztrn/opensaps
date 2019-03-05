@@ -55,7 +55,7 @@ func (sh SlackHandler) ServeHTTP(respwriter http.ResponseWriter, req *http.Reque
 
 	var sent_to_pusher bool = false
 	for name, config := range cfg.Webhooks {
-		if strings.Contains(url_splitted[2], config.Slack.Random1) && strings.Contains(url_splitted[3], config.Slack.Random2) && strings.Contains(url_splitted[4], config.Slack.LongRandom) {
+		if strings.Contains(req.URL.Path, config.Slack.Random1) && strings.Contains(req.URL.Path, config.Slack.Random2) && strings.Contains(req.URL.Path, config.Slack.LongRandom) {
 			c.Log.Debugf("Passed data belongs to '%s' and should go to '%s' pusher, protocol '%s'", name, config.Remote.PushTo, config.Remote.Pusher)
 			// Parse message into SlackMessage structure.
 			if strings.Contains(string(body)[0:7], "payload") {

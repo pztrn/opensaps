@@ -28,3 +28,9 @@ telegram:
   telegram_test:
     bot_id: "bot:id"
     chat_id: "chat_id or -chat_id"
+    proxy:
+      enabled: false
+      type: "http"
+      address: "localhost:3128"
+      user: ""
+      password: ""

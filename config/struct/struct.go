@@ -15,9 +15,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package configstruct
 
-// Config's root.
+// ConfigStruct is a config's root.
 type ConfigStruct struct {
 	SlackHandler ConfigSlackHandler        `yaml:"slackhandler"`
 	Webhooks     map[string]ConfigWebhook  `yaml:"webhooks"`
@@ -59,8 +60,19 @@ type ConfigMatrix struct {
 	Room     string `yaml:"room"`
 }
 
-// Telegram pusher configuration
+// ConfigTelegram is a telegram pusher configuration
 type ConfigTelegram struct {
-	BotID  string `yaml:"bot_id"`
-	ChatID string `yaml:"chat_id"`
+	BotID  string      `yaml:"bot_id"`
+	ChatID string      `yaml:"chat_id"`
+	Proxy  ConfigProxy `yaml:"proxy"`
+}
+
+// ConfigProxy represents proxy server configuration.
+type ConfigProxy struct {
+	// ProxyType is a proxy type. Currently ignored.
+	Enabled   bool   `yaml:"enabled"`
+	ProxyType string `yaml:"proxy_type"`
+	Address   string `yaml:"address"`
+	User      string `yaml:"user"`
+	Password  string `yaml:"password"`
 }

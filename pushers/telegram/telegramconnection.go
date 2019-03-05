@@ -26,19 +26,16 @@ import (
 	"strings"
 
 	// local
+	"gitlab.com/pztrn/opensaps/config/struct"
 	"gitlab.com/pztrn/opensaps/slack/message"
 )
 
 type TelegramConnection struct {
-	botId    string
-	chatId   string
-	connName string
+	config configstruct.ConfigTelegram
 }
 
-func (tc *TelegramConnection) Initialize(connName string, botId string, chatId string) {
-	tc.connName = connName
-	tc.chatId = chatId
-	tc.botId = botId
+func (tc *TelegramConnection) Initialize(connName string, cfg configstruct.ConfigTelegram) {
+	tc.config = cfg
 }
 
 func (tc *TelegramConnection) ProcessMessage(message slackmessage.SlackMessage) {
@@ -140,15 +137,47 @@ func (tc *TelegramConnection) ProcessMessage(message slackmessage.SlackMessage) 
 
 func (tc *TelegramConnection) SendMessage(message string) {
 	msgdata := url.Values{}
-	msgdata.Set("chat_id", tc.chatId)
+	msgdata.Set("chat_id", tc.config.ChatID)
 	msgdata.Set("text", message)
 	msgdata.Set("parse_mode", "HTML")
 
-	client := &http.Client{}
-	botUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tc.botId)
+	// Are we should use proxy?
+	httpTransport := &http.Transport{}
+	if tc.config.Proxy.Enabled {
+		// Compose proxy URL.
+		proxyURL := "http://"
+		if tc.config.Proxy.User != "" {
+			proxyURL += tc.config.Proxy.User
+			if tc.config.Proxy.Password != "" {
+				proxyURL += ":" + tc.config.Proxy.Password
+			}
+			proxyURL += "@"
+		}
+		proxyURL += tc.config.Proxy.Address
+
+		proxyURLParsed, err := url.Parse(proxyURL)
+		if err != nil {
+			c.Log.Errorln("Error while constructing/parsing proxy URL:", err.Error())
+		} else {
+			httpTransport.Proxy = http.ProxyURL(proxyURLParsed)
+		}
+	}
+
+	client := &http.Client{Transport: httpTransport}
+	botUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tc.config.BotID)
 	c.Log.Debugln("Bot URL:", botUrl)
-	response, _ := client.PostForm(botUrl, msgdata)
-	c.Log.Debugln("Status:", response.Status)
+	response, err := client.PostForm(botUrl, msgdata)
+	if err != nil {
+		c.Log.Errorln("Error ocured while sending data to Telegram:", err.Error())
+	} else {
+		c.Log.Debugln("Status:", response.Status)
+		if response.StatusCode != 200 {
+			body := []byte{}
+			_, _ = response.Body.Read(body)
+			response.Body.Close()
+			c.Log.Debugln(body)
+		}
+	}
 }
 
 func (tc *TelegramConnection) Shutdown() {

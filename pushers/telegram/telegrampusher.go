@@ -33,7 +33,7 @@ func (tp TelegramPusher) Initialize() {
 		c.Log.Infof("Initializing connection: '%s'", name)
 		conn := TelegramConnection{}
 		connections[name] = &conn
-		go conn.Initialize(name, config.BotID, config.ChatID)
+		go conn.Initialize(name, config)
 	}
 }
 
