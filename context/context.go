@@ -81,7 +81,7 @@ func (c *Context) RegisterSlackAPIServerInterface(sasi slackapiserverinterface.S
 	c.SlackAPIServer.Initialize()
 }
 
-func (c *Context) SendToParser(name string, message slackmessage.SlackMessage) map[string]string {
+func (c *Context) SendToParser(name string, message slackmessage.SlackMessage) map[string]interface{} {
 	parser, found := c.Parsers[strings.ToLower(name)]
 	if !found {
 		c.Log.Errorf("Parser '%s' not found, will use default one!", name)

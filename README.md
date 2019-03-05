@@ -8,6 +8,8 @@ Initially this project was created for integrating Gitlab and Gitea
 into Matrix, because there was no good incoming webhooks support.
 But it can be used for anything that provides Slack Webhooks support.
 
+Join #opensaps:pztrn.name Matrix room for help and chat!
+
 # Installation
 
 ```
