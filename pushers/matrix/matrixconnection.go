@@ -185,7 +185,7 @@ func (mxc *MatrixConnection) Initialize(conn_name string, api_root string, user 
 
 	// If we're here - everything is okay and we already in room. Send
 	// greeting message.
-	mxc.SendMessage("OpenSAPS is back in business for connection '" + mxc.conn_name + "'!")
+	//mxc.SendMessage("OpenSAPS is back in business for connection '" + mxc.conn_name + "'!")
 }
 
 // This function launches when new data was received thru Slack API.
@@ -200,7 +200,7 @@ func (mxc *MatrixConnection) ProcessMessage(message slackmessage.SlackMessage) {
 	if linksFound {
 		links := linksRaw.([][]string)
 		for _, link := range links {
-			messageToSend = strings.Replace(messageToSend, "<"+link[0]+">", `<a href="`+link[2]+`">`+link[3]+`</a>`, -1)
+			messageToSend = strings.Replace(messageToSend, link[0], `<a href="`+link[1]+`">`+link[2]+`</a>`, -1)
 		}
 	}
 

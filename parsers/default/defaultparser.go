@@ -40,8 +40,9 @@ func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[stri
 	}
 
 	// Get all links from message.
-	r := regexp.MustCompile("((https??://[a-zA-Z0-9.#!*/ _-]+)\\|([a-zA-Z0-9.#!*/ _+-]+))")
+	r := regexp.MustCompile(`<{1}([\pL\pP\pN]+)\|{1}([\pL\pP\pN\pZs]+)>{1}`)
 	foundLinks := r.FindAllStringSubmatch(msg, -1)
+	c.Log.Debugln("Found links:", foundLinks)
 
 	// Replace them.
 	/*for _, link := range foundLinks {

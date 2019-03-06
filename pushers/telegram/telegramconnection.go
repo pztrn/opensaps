@@ -47,7 +47,7 @@ func (tc *TelegramConnection) ProcessMessage(message slackmessage.SlackMessage) 
 	if linksFound {
 		links := linksRaw.([][]string)
 		for _, link := range links {
-			messageToSend = strings.Replace(messageToSend, "<"+link[0]+">", `<a href="`+link[2]+`">`+link[3]+`</a>`, -1)
+			messageToSend = strings.Replace(messageToSend, link[0], `<a href="`+link[1]+`">`+link[2]+`</a>`, -1)
 		}
 	}
 
