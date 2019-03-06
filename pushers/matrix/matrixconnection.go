@@ -165,13 +165,13 @@ func (mxc *MatrixConnection) Initialize(conn_name string, api_root string, user 
 		c.Log.Fatalf("Failed to login to Matrix with user '%s' (conn %s): '%s'", mxc.username, mxc.conn_name, err.Error())
 	}
 	// Parse received JSON and get access token.
-	data := make(map[string]string)
+	data := make(map[string]interface{})
 	err1 := json.Unmarshal(reply, &data)
 	if err1 != nil {
-		c.Log.Fatalf("Failed to parse received JSON from Matrix for user '%s' (conn %s): %s", mxc.username, mxc.conn_name, err1.Error())
+		c.Log.Fatalf("Failed to parse received JSON from Matrix for user '%s' (conn %s): %s (data was: %s)", mxc.username, mxc.conn_name, err1.Error(), reply)
 	}
-	mxc.token = data["access_token"]
-	mxc.device_id = data["device_id"]
+	mxc.token = data["access_token"].(string)
+	mxc.device_id = data["device_id"].(string)
 
 	c.Log.Debugf("Login successful for conn '%s', access token is '%s', our device_id is '%s'", mxc.conn_name, mxc.token, mxc.device_id)
 
