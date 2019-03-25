@@ -20,6 +20,7 @@ package defaultparser
 import (
 	// stdlib
 	"regexp"
+	"strings"
 
 	// local
 	"gitlab.com/pztrn/opensaps/slack/message"
@@ -39,16 +40,16 @@ func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[stri
 		msg += attachment.Text + "\n"
 	}
 
+	// Remove line break in very beginning, if present.
+	if strings.Contains(msg[0:3], "\n") {
+		c.Log.Debugln("Initial br found, removing")
+		msg = strings.Replace(msg, "\n", "", 1)
+	}
+
 	// Get all links from message.
 	r := regexp.MustCompile(`<{1}([\pL\pP\pN]+)\|{1}([\pL\pP\pN\pZs]+)>{1}`)
 	foundLinks := r.FindAllStringSubmatch(msg, -1)
 	c.Log.Debugln("Found links:", foundLinks)
-
-	// Replace them.
-	/*for _, link := range foundLinks {
-		c.Log.Debugln("Link:", link)
-		msg = strings.Replace(msg, "<"+link[0]+">", "<a href='"+link[2]+"'>"+link[3]+"</a>", 1)
-	}*/
 
 	data := make(map[string]interface{})
 	data["message"] = msg
