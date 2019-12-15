@@ -22,8 +22,8 @@ import (
 	"net/http"
 
 	// local
-	"gitlab.com/pztrn/opensaps/context"
-	"gitlab.com/pztrn/opensaps/slack/apiserverinterface"
+	"go.dev.pztrn.name/opensaps/context"
+	slackapiserverinterface "go.dev.pztrn.name/opensaps/slack/apiserverinterface"
 )
 
 var (
@@ -34,6 +34,6 @@ var (
 
 func New(cc *context.Context) {
 	c = cc
-	sh := SlackAPIServer{}
+	sh := APIServer{}
 	c.RegisterSlackAPIServerInterface(slackapiserverinterface.SlackAPIServerInterface(sh))
 }

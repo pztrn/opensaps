@@ -1,0 +1,15 @@
+run:
+  deadline: 5m
+linters:
+  enable-all: true
+  disable:
+    # Because globals might exist, but according to our codestyle they
+    # should be lowercased and considered as unexported.
+    - gochecknoglobals
+    # This linter goes crazy for nothing (almost).
+    - funlen
+linters-settings:
+  lll:
+    line-length: 128
+  gocyclo:
+    min-complexity: 40

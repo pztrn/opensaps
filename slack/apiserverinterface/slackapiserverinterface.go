@@ -18,6 +18,6 @@
 package slackapiserverinterface
 
 type SlackAPIServerInterface interface {
-    Initialize()
-    Shutdown()
+	Initialize()
+	Shutdown()
 }

@@ -9,7 +9,7 @@
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the itplied warranty of
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
@@ -19,7 +19,7 @@ package telegrampusher
 
 import (
 	// local
-	"gitlab.com/pztrn/opensaps/slack/message"
+	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
 type TelegramPusher struct{}
@@ -31,8 +31,10 @@ func (tp TelegramPusher) Initialize() {
 	cfg := c.Config.GetConfig()
 	for name, config := range cfg.Telegram {
 		c.Log.Infof("Initializing connection: '%s'", name)
+
 		conn := TelegramConnection{}
 		connections[name] = &conn
+
 		go conn.Initialize(name, config)
 	}
 }
@@ -43,6 +45,7 @@ func (tp TelegramPusher) Push(connection string, data slackmessage.SlackMessage)
 		c.Log.Errorf("Connection not found: '%s'!", connection)
 		return
 	}
+
 	c.Log.Debugf("Pushing data to '%s'", connection)
 	conn.ProcessMessage(data)
 }

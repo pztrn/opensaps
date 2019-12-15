@@ -18,6 +18,5 @@
 package context
 
 func New() *Context {
-    c := &Context{}
-    return c
+	return &Context{}
 }

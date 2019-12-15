@@ -17,10 +17,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package matrixpusher
 
-import (
-	// local
-	"gitlab.com/pztrn/opensaps/slack/message"
-)
+import slackmessage "go.dev.pztrn.name/opensaps/slack/message"
+
+// local
 
 type MatrixPusher struct{}
 
@@ -31,9 +30,11 @@ func (mp MatrixPusher) Initialize() {
 	cfg := c.Config.GetConfig()
 	for name, config := range cfg.Matrix {
 		c.Log.Infof("Initializing connection: '%s'", name)
+
 		conn := MatrixConnection{}
 		connections[name] = &conn
-		go conn.Initialize(name, config.ApiRoot, config.User, config.Password, config.Room)
+
+		go conn.Initialize(name, config.APIRoot, config.User, config.Password, config.Room)
 	}
 }
 
@@ -43,6 +44,7 @@ func (mp MatrixPusher) Push(connection string, data slackmessage.SlackMessage) {
 		c.Log.Errorf("Connection not found: '%s'!", connection)
 		return
 	}
+
 	c.Log.Debugf("Pushing data to '%s'", connection)
 	conn.ProcessMessage(data)
 }

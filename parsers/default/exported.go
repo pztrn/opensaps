@@ -19,8 +19,8 @@ package defaultparser
 
 import (
 	// local
-	"gitlab.com/pztrn/opensaps/context"
-	"gitlab.com/pztrn/opensaps/parsers/interface"
+	"go.dev.pztrn.name/opensaps/context"
+	parserinterface "go.dev.pztrn.name/opensaps/parsers/interface"
 )
 
 var (

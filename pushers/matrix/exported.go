@@ -19,8 +19,8 @@ package matrixpusher
 
 import (
 	// local
-	"gitlab.com/pztrn/opensaps/context"
-	"gitlab.com/pztrn/opensaps/pushers/interface"
+	"go.dev.pztrn.name/opensaps/context"
+	pusherinterface "go.dev.pztrn.name/opensaps/pushers/interface"
 )
 
 var (

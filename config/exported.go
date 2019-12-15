@@ -19,9 +19,9 @@ package config
 
 import (
 	// local
-	"gitlab.com/pztrn/opensaps/config/interface"
-	"gitlab.com/pztrn/opensaps/config/struct"
-	"gitlab.com/pztrn/opensaps/context"
+	configurationinterface "go.dev.pztrn.name/opensaps/config/interface"
+	configstruct "go.dev.pztrn.name/opensaps/config/struct"
+	"go.dev.pztrn.name/opensaps/context"
 )
 
 var (

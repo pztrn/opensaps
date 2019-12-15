@@ -19,7 +19,7 @@ package parserinterface
 
 import (
 	// local
-	"gitlab.com/pztrn/opensaps/slack/message"
+	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
 type ParserInterface interface {

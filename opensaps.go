@@ -24,12 +24,12 @@ import (
 	"syscall"
 
 	// local
-	"gitlab.com/pztrn/opensaps/config"
-	"gitlab.com/pztrn/opensaps/context"
-	"gitlab.com/pztrn/opensaps/parsers/default"
-	"gitlab.com/pztrn/opensaps/pushers/matrix"
-	"gitlab.com/pztrn/opensaps/pushers/telegram"
-	"gitlab.com/pztrn/opensaps/slack"
+	"go.dev.pztrn.name/opensaps/config"
+	"go.dev.pztrn.name/opensaps/context"
+	defaultparser "go.dev.pztrn.name/opensaps/parsers/default"
+	matrixpusher "go.dev.pztrn.name/opensaps/pushers/matrix"
+	telegrampusher "go.dev.pztrn.name/opensaps/pushers/telegram"
+	"go.dev.pztrn.name/opensaps/slack"
 )
 
 func main() {
@@ -54,15 +54,17 @@ func main() {
 	telegrampusher.New(c)
 
 	// CTRL+C handler.
-	signal_handler := make(chan os.Signal, 1)
-	shutdown_done := make(chan bool, 1)
-	signal.Notify(signal_handler, os.Interrupt, syscall.SIGTERM)
+	signalHandler := make(chan os.Signal, 1)
+	shutdownDone := make(chan bool, 1)
+
+	signal.Notify(signalHandler, os.Interrupt, syscall.SIGTERM)
+
 	go func() {
-		<-signal_handler
+		<-signalHandler
 		c.Shutdown()
-		shutdown_done <- true
+		shutdownDone <- true
 	}()
 
-	<-shutdown_done
+	<-shutdownDone
 	os.Exit(0)
 }

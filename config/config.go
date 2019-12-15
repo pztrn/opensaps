@@ -26,10 +26,10 @@ import (
 	"strings"
 
 	// local
-	"gitlab.com/pztrn/opensaps/config/struct"
+	configstruct "go.dev.pztrn.name/opensaps/config/struct"
 
 	// other
-	"gitlab.com/pztrn/flagger"
+	"go.dev.pztrn.name/flagger"
 	"gopkg.in/yaml.v2"
 )
 
@@ -55,6 +55,7 @@ func (conf Configuration) GetTempValue(key string) (string, error) {
 		if err != nil {
 			c.Log.Fatalln("Failed to get current user data: " + err.Error())
 		}
+
 		value = strings.Replace(value, "~", usr.HomeDir, 1)
 	}
 
@@ -66,14 +67,14 @@ func (conf Configuration) Initialize() {
 
 	tempconfig = make(map[string]string)
 
-	flag_configpath := flagger.Flag{
+	flagConfigpath := flagger.Flag{
 		Name:         "config",
 		Description:  "Path to configuration file.",
 		Type:         "string",
 		DefaultValue: "~/.config/OpenSAPS/config.yaml",
 	}
 
-	c.Flagger.AddFlag(&flag_configpath)
+	_ = c.Flagger.AddFlag(&flagConfigpath)
 }
 
 // Initializes configuration root path for later usage.
@@ -103,20 +104,22 @@ func (conf Configuration) LoadConfigurationFromFile() {
 	if err != nil {
 		c.Log.Fatalln("Failed to get configuration file path from internal temporary configuration storage! OpenSAPS is BROKEN!")
 	}
+
 	c.Log.Infof("Loading configuration from '%s'...", configpath)
 
 	// Read file into memory.
-	config_bytes, err1 := ioutil.ReadFile(configpath)
+	configBytes, err1 := ioutil.ReadFile(configpath)
 	if err1 != nil {
-		c.Log.Fatalf("Error occured while reading configuration file: %s", err1.Error())
+		c.Log.Fatalf("Error occurred while reading configuration file: %s", err1.Error())
 	}
 
 	config = &configstruct.ConfigStruct{}
 	// Parse YAML.
-	err2 := yaml.Unmarshal(config_bytes, config)
+	err2 := yaml.Unmarshal(configBytes, config)
 	if err2 != nil {
 		c.Log.Fatalf("Failed to parse configuration file: %s", err2.Error())
 	}
+
 	c.Log.Debugln("Loaded configuration:", fmt.Sprintf("%+v", config))
 }
 

@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	// local
-	"gitlab.com/pztrn/opensaps/slack/message"
+	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
 type DefaultParser struct{}
@@ -43,6 +43,7 @@ func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[stri
 	// Remove line break in very beginning, if present.
 	if strings.Contains(msg[0:3], "\n") {
 		c.Log.Debugln("Initial br found, removing")
+
 		msg = strings.Replace(msg, "\n", "", 1)
 	}
 
@@ -54,5 +55,6 @@ func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[stri
 	data := make(map[string]interface{})
 	data["message"] = msg
 	data["links"] = foundLinks
+
 	return data
 }

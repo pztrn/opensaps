@@ -18,18 +18,18 @@
 package slackmessage
 
 type SlackMessage struct {
-    Channel             string              `json:"channel"`
-    Text                string              `json:"text"`
-    Username            string              `json:"username"`
-    IconURL             string              `json:"icon_url"`
-    UnfurlLinks         int                 `json:"unfurl_links"`
-    LinkNames           int                 `json:"link_names"`
-    Attachments         []SlackAttachments  `json:"attachments"`
+	Channel     string             `json:"channel"`
+	Text        string             `json:"text"`
+	Username    string             `json:"username"`
+	IconURL     string             `json:"icon_url"`
+	UnfurlLinks int                `json:"unfurl_links"`
+	LinkNames   int                `json:"link_names"`
+	Attachments []SlackAttachments `json:"attachments"`
 }
 
 type SlackAttachments struct {
-    Fallback            string              `json:"fallback"`
-    Color               string              `json:"color"`
-    Title               string              `json:"title"`
-    Text                string              `json:"text"`
+	Fallback string `json:"fallback"`
+	Color    string `json:"color"`
+	Title    string `json:"title"`
+	Text     string `json:"text"`
 }

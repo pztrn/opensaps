@@ -25,8 +25,8 @@ import (
 	"strings"
 
 	// local
-	"gitlab.com/pztrn/opensaps/config/struct"
-	"gitlab.com/pztrn/opensaps/slack/message"
+	configstruct "go.dev.pztrn.name/opensaps/config/struct"
+	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
 type TelegramConnection struct {
@@ -65,6 +65,7 @@ func (tc *TelegramConnection) SendMessage(message string) {
 
 	// Are we should use proxy?
 	httpTransport := &http.Transport{}
+
 	if tc.config.Proxy.Enabled {
 		// Compose proxy URL.
 		proxyURL := "http://"
@@ -73,8 +74,10 @@ func (tc *TelegramConnection) SendMessage(message string) {
 			if tc.config.Proxy.Password != "" {
 				proxyURL += ":" + tc.config.Proxy.Password
 			}
+
 			proxyURL += "@"
 		}
+
 		proxyURL += tc.config.Proxy.Address
 
 		proxyURLParsed, err := url.Parse(proxyURL)
@@ -86,11 +89,13 @@ func (tc *TelegramConnection) SendMessage(message string) {
 	}
 
 	client := &http.Client{Transport: httpTransport}
-	botUrl := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tc.config.BotID)
-	c.Log.Debugln("Bot URL:", botUrl)
-	response, err := client.PostForm(botUrl, msgdata)
+	botURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tc.config.BotID)
+
+	c.Log.Debugln("Bot URL:", botURL)
+
+	response, err := client.PostForm(botURL, msgdata)
 	if err != nil {
-		c.Log.Errorln("Error ocured while sending data to Telegram:", err.Error())
+		c.Log.Errorln("Error occurred while sending data to Telegram:", err.Error())
 	} else {
 		c.Log.Debugln("Status:", response.Status)
 		if response.StatusCode != 200 {

@@ -27,12 +27,12 @@ import (
 	"strings"
 
 	// local
-	"gitlab.com/pztrn/opensaps/slack/message"
+	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
-type SlackHandler struct{}
+type Handler struct{}
 
-func (sh SlackHandler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
+func (sh Handler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
 	c.Log.Debugf("Received '%s' (empty = GET) request from %s, URL: '%s'", req.Method, req.Host, req.URL.Path)
 
 	// We should catch only POST requests. Otherwise return HTTP 404.
@@ -40,6 +40,7 @@ func (sh SlackHandler) ServeHTTP(respwriter http.ResponseWriter, req *http.Reque
 		c.Log.Debugln("Not a POST request, returning HTTP 404")
 		respwriter.WriteHeader(404)
 		fmt.Fprintf(respwriter, "NOT FOUND")
+
 		return
 	}
 
@@ -49,45 +50,51 @@ func (sh SlackHandler) ServeHTTP(respwriter http.ResponseWriter, req *http.Reque
 	c.Log.Debugf("Received body: %s", string(body))
 
 	// Try to figure out where we should push received data.
-	url_splitted := strings.Split(req.URL.Path, "/")
-	fmt.Println(url_splitted)
 	cfg := c.Config.GetConfig()
 
-	var sent_to_pusher bool = false
+	var sentToPusher bool = false
+
 	for name, config := range cfg.Webhooks {
-		if strings.Contains(req.URL.Path, config.Slack.Random1) && strings.Contains(req.URL.Path, config.Slack.Random2) && strings.Contains(req.URL.Path, config.Slack.LongRandom) {
-			c.Log.Debugf("Passed data belongs to '%s' and should go to '%s' pusher, protocol '%s'", name, config.Remote.PushTo, config.Remote.Pusher)
+		if strings.Contains(req.URL.Path, config.Slack.Random1) &&
+			strings.Contains(req.URL.Path, config.Slack.Random2) &&
+			strings.Contains(req.URL.Path, config.Slack.LongRandom) {
+			c.Log.Debugf("Passed data belongs to '%s' and should go to '%s' pusher, protocol '%s'",
+				name, config.Remote.PushTo, config.Remote.Pusher)
 			// Parse message into SlackMessage structure.
 			if strings.Contains(string(body)[0:7], "payload") {
 				// We have HTTP form payload. It still should be a
 				// parseable JSON string, we just need to do some
 				// preparations.
 				// First - remove "payload=" from the beginning.
-				temp_body := string(body)
-				temp_body = strings.Replace(temp_body, "payload=", "", 1)
+				tempBody := string(body)
+				tempBody = strings.Replace(tempBody, "payload=", "", 1)
 				// Second - unescape data.
-				temp_body, err := url.QueryUnescape(temp_body)
+				tempBody, err := url.QueryUnescape(tempBody)
 				if err != nil {
 					c.Log.Errorln("Failed to decode body into parseable string!")
 					return
 				}
 
 				// And finally - convert body back to bytes.
-				body = []byte(temp_body)
+				body = []byte(tempBody)
 			}
+
 			slackmsg := slackmessage.SlackMessage{}
+
 			err := json.Unmarshal(body, &slackmsg)
 			if err != nil {
 				c.Log.Error("Failed to decode JSON into SlackMessage struct: '%s'", err.Error())
 				return
 			}
+
 			c.Log.Debug("Received message:", fmt.Sprintf("%+v", slackmsg))
 			c.SendToPusher(config.Remote.Pusher, config.Remote.PushTo, slackmsg)
-			sent_to_pusher = true
+
+			sentToPusher = true
 		}
 	}
 
-	if !sent_to_pusher {
+	if !sentToPusher {
 		c.Log.Debug("Don't know where to push data. Ignoring with HTTP 404")
 		respwriter.WriteHeader(404)
 		fmt.Fprintf(respwriter, "NOT FOUND")

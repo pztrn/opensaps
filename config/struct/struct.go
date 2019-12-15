@@ -54,7 +54,7 @@ type ConfigWebhookRemote struct {
 
 // Matrix pusher configuration.
 type ConfigMatrix struct {
-	ApiRoot  string `yaml:"api_root"`
+	APIRoot  string `yaml:"api_root"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	Room     string `yaml:"room"`

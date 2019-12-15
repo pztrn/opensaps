@@ -29,45 +29,47 @@ package slack
 // handler for it.
 
 import (
-    // stdlib
-    "fmt"
-    "net/http"
-    "time"
+	// stdlib
+
+	"context"
+	"net/http"
+	"time"
 )
 
-type SlackAPIServer struct {}
+type APIServer struct{}
 
-func (sh SlackAPIServer) Initialize() {
-    c.Log.Infoln("Initializing Slack API handler...")
+func (sh APIServer) Initialize() {
+	c.Log.Infoln("Initializing Slack API handler...")
 
-    // Start HTTP server.
-    // As OpenSAPS designed to be behind some proxy (nginx, Caddy, etc.)
-    // we will listen only to plain HTTP.
-    // Note to those who wants HTTPS - proxify with nginx, Caddy, etc!
-    // Don't send pull requests, patches, don't create issues! :)
-    cfg := c.Config.GetConfig()
+	// Start HTTP server.
+	// As OpenSAPS designed to be behind some proxy (nginx, Caddy, etc.)
+	// we will listen only to plain HTTP.
+	// Note to those who wants HTTPS - proxify with nginx, Caddy, etc!
+	// Don't send pull requests, patches, don't create issues! :)
+	cfg := c.Config.GetConfig()
 
-    httpsrv = &http.Server{
-        Addr:           cfg.SlackHandler.Listener.Address,
-        // This handler will figure out from where request has come and will
-        // send it to approriate pusher. Pusher should also determine to which
-        // connection data should be sent.
-        Handler:        SlackHandler{},
-        ReadTimeout:    10 * time.Second,
-        WriteTimeout:   10 * time.Second,
-        MaxHeaderBytes: 1 << 20,
-    }
+	httpsrv = &http.Server{
+		Addr: cfg.SlackHandler.Listener.Address,
+		// This handler will figure out from where request has come and will
+		// send it to appropriate pusher. Pusher should also determine to which
+		// connection data should be sent.
+		Handler:        Handler{},
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
 
-    go httpsrv.ListenAndServe()
-    c.Log.Infof("Slack Webhooks API server starting to listen on %s", cfg.SlackHandler.Listener.Address)
+	go func() {
+		_ = httpsrv.ListenAndServe()
+	}()
+
+	c.Log.Infof("Slack Webhooks API server starting to listen on %s", cfg.SlackHandler.Listener.Address)
 }
 
-func (sh SlackAPIServer) handleRequest(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello, %q", r.URL.Path)
-}
+func (sh APIServer) Shutdown() {
+	c.Log.Infoln("Shutting down Slack API handler...")
 
-func (sh SlackAPIServer) Shutdown() {
-    c.Log.Infoln("Shutting down Slack API handler...")
-    httpsrv.Shutdown(nil)
-    c.Log.Infoln("Slack API HTTP server shutted down")
+	_ = httpsrv.Shutdown(context.TODO())
+
+	c.Log.Infoln("Slack API HTTP server shutted down")
 }

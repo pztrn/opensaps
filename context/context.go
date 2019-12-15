@@ -23,15 +23,15 @@ import (
 	"strings"
 
 	// local
-	"gitlab.com/pztrn/opensaps/config/interface"
-	"gitlab.com/pztrn/opensaps/parsers/interface"
-	"gitlab.com/pztrn/opensaps/pushers/interface"
-	"gitlab.com/pztrn/opensaps/slack/apiserverinterface"
-	"gitlab.com/pztrn/opensaps/slack/message"
+	configurationinterface "go.dev.pztrn.name/opensaps/config/interface"
+	parserinterface "go.dev.pztrn.name/opensaps/parsers/interface"
+	pusherinterface "go.dev.pztrn.name/opensaps/pushers/interface"
+	slackapiserverinterface "go.dev.pztrn.name/opensaps/slack/apiserverinterface"
+	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 
 	// other
 	"github.com/pztrn/mogrus"
-	"gitlab.com/pztrn/flagger"
+	"go.dev.pztrn.name/flagger"
 )
 
 type Context struct {

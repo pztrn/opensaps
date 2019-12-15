@@ -19,7 +19,7 @@ package configurationinterface
 
 import (
 	// local
-	"gitlab.com/pztrn/opensaps/config/struct"
+	configstruct "go.dev.pztrn.name/opensaps/config/struct"
 )
 
 type ConfigurationInterface interface {
