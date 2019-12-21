@@ -19,6 +19,8 @@ steps:
       CGO_ENABLED: 0
     commands:
       - golangci-lint run
+    depends_on:
+      - notify-start
 
   - name: test
     image: golang:1.13.5-alpine
@@ -26,6 +28,8 @@ steps:
       CGO_ENABLED: 0
     commands:
       - go test ./...
+    depends_on:
+      - notify-start
 
   - name: docker
     image: plugins/docker
@@ -38,6 +42,9 @@ steps:
         from_secret: dockerhub_password
       repo: pztrn/opensaps
       auto_tag: true
+    depends_on:
+      - lint
+      - test
 
   - name: notify-end
     when:
