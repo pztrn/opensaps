@@ -83,7 +83,7 @@ func (sh Handler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
 
 			err := json.Unmarshal(body, &slackmsg)
 			if err != nil {
-				c.Log.Error("Failed to decode JSON into SlackMessage struct: '%s'", err.Error())
+				c.Log.Errorf("Failed to decode JSON into SlackMessage struct: '%s'\n", err.Error())
 				return
 			}
 

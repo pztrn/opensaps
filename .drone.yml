@@ -21,7 +21,7 @@ steps:
       - golangci-lint run
 
   - name: test
-    image: golang:1.13.4-alpine
+    image: golang:1.13.5-alpine
     environment:
       CGO_ENABLED: 0
     commands:
