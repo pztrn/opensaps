@@ -4,23 +4,12 @@ type: docker
 name: build
 
 steps:
-  - name: notify-start
-    image: pztrn/discordrone
-    settings:
-      webhook_id:
-        from_secret: discord_webhook_id
-      webhook_token:
-        from_secret: discord_webhook_secret
-      message: 'Starting building **{{repo.name}}#{{build.number}}@{{commit.sha}}** @ {{datetime build.started "02-Jan-2006 15:04:05 MST" "Asia/Yekaterinburg"}} (See {{build.link}} for logs).'
-
   - name: lint
     image: golangci/golangci-lint:latest
     environment:
       CGO_ENABLED: 0
     commands:
       - golangci-lint run
-    depends_on:
-      - notify-start
 
   - name: test
     image: golang:1.13.5-alpine
@@ -28,8 +17,6 @@ steps:
       CGO_ENABLED: 0
     commands:
       - go test ./...
-    depends_on:
-      - notify-start
 
   - name: docker
     image: plugins/docker
@@ -45,25 +32,3 @@ steps:
     depends_on:
       - lint
       - test
-
-  - name: notify-end
-    when:
-      status:
-        - success
-        - failure
-    image: pztrn/discordrone
-    settings:
-      webhook_id:
-        from_secret: discord_webhook_id
-      webhook_token:
-        from_secret: discord_webhook_secret
-      message: "
-        {{#success build.status}}
-        **{{repo.name}}#{{build.number}}@{{commit.sha}}** built in {{since build.startedint}}.
-        {{ else }}
-        **{{repo.name}}#{{build.number}}@{{commit.sha}}** failed. See {{build.link}}.
-        {{/success}}"
-    depends_on:
-      - lint
-      - test
-      - docker
