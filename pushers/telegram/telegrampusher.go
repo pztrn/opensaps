@@ -18,20 +18,20 @@
 package telegrampusher
 
 import (
-	// local
 	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
 type TelegramPusher struct{}
 
 func (tp TelegramPusher) Initialize() {
-	c.Log.Infoln("Initializing Telegram protocol pusher...")
+	c.Log.Info().Msg("Initializing Telegram protocol pusher...")
 
 	// Get configuration for pushers and initialize every connection.
 	cfg := c.Config.GetConfig()
 	for name, config := range cfg.Telegram {
-		c.Log.Infof("Initializing connection: '%s'", name)
+		c.Log.Info().Str("conn", name).Msg("Initializing connection...")
 
+		// nolint:exhaustivestruct
 		conn := TelegramConnection{}
 		connections[name] = &conn
 
@@ -42,16 +42,17 @@ func (tp TelegramPusher) Initialize() {
 func (tp TelegramPusher) Push(connection string, data slackmessage.SlackMessage) {
 	conn, found := connections[connection]
 	if !found {
-		c.Log.Errorf("Connection not found: '%s'!", connection)
+		c.Log.Error().Str("conn", connection).Msg("Connection not found")
+
 		return
 	}
 
-	c.Log.Debugf("Pushing data to '%s'", connection)
+	c.Log.Debug().Str("conn", connection).Msg("Pushing data")
 	conn.ProcessMessage(data)
 }
 
 func (tp TelegramPusher) Shutdown() {
-	c.Log.Infoln("Shutting down Telegram pusher...")
+	c.Log.Info().Msg("Shutting down Telegram pusher...")
 
 	for _, conn := range connections {
 		conn.Shutdown()

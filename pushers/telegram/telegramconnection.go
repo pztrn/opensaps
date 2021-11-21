@@ -18,13 +18,11 @@
 package telegrampusher
 
 import (
-	// stdlib
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
-	// local
 	configstruct "go.dev.pztrn.name/opensaps/config/struct"
 	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
@@ -41,17 +39,17 @@ func (tc *TelegramConnection) ProcessMessage(message slackmessage.SlackMessage) 
 	// Prepare message body.
 	messageData := c.SendToParser(message.Username, message)
 
-	messageToSend := messageData["message"].(string)
+	messageToSend, _ := messageData["message"].(string)
 	// We'll use HTML, so reformat links accordingly (if any).
 	linksRaw, linksFound := messageData["links"]
 	if linksFound {
-		links := linksRaw.([][]string)
+		links, _ := linksRaw.([][]string)
 		for _, link := range links {
-			messageToSend = strings.Replace(messageToSend, link[0], `<a href="`+link[1]+`">`+link[2]+`</a>`, -1)
+			messageToSend = strings.ReplaceAll(messageToSend, link[0], `<a href="`+link[1]+`">`+link[2]+`</a>`)
 		}
 	}
 
-	c.Log.Debugln("Crafted message:", messageToSend)
+	c.Log.Debug().Msgf("Crafted message: %s", messageToSend)
 
 	// Send message.
 	tc.SendMessage(messageToSend)
@@ -64,8 +62,10 @@ func (tc *TelegramConnection) SendMessage(message string) {
 	msgdata.Set("parse_mode", "HTML")
 
 	// Are we should use proxy?
+	// nolint:exhaustivestruct
 	httpTransport := &http.Transport{}
 
+	// nolint:nestif
 	if tc.config.Proxy.Enabled {
 		// Compose proxy URL.
 		proxyURL := "http://"
@@ -82,27 +82,30 @@ func (tc *TelegramConnection) SendMessage(message string) {
 
 		proxyURLParsed, err := url.Parse(proxyURL)
 		if err != nil {
-			c.Log.Errorln("Error while constructing/parsing proxy URL:", err.Error())
+			c.Log.Error().Err(err).Msg("Error while constructing/parsing proxy URL")
 		} else {
 			httpTransport.Proxy = http.ProxyURL(proxyURLParsed)
 		}
 	}
 
+	// nolint:exhaustivestruct
 	client := &http.Client{Transport: httpTransport}
 	botURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tc.config.BotID)
 
-	c.Log.Debugln("Bot URL:", botURL)
+	c.Log.Debug().Msgf("Bot URL: %s", botURL)
 
+	// ToDo: fix it.
+	// nolint
 	response, err := client.PostForm(botURL, msgdata)
 	if err != nil {
-		c.Log.Errorln("Error occurred while sending data to Telegram:", err.Error())
+		c.Log.Error().Err(err).Msg("Error occurred while sending data to Telegram")
 	} else {
-		c.Log.Debugln("Status:", response.Status)
-		if response.StatusCode != 200 {
+		c.Log.Debug().Msgf("Status: %s", response.Status)
+		if response.StatusCode != http.StatusOK {
 			body := []byte{}
 			_, _ = response.Body.Read(body)
 			response.Body.Close()
-			c.Log.Debugln(body)
+			c.Log.Debug().Msg(string(body))
 		}
 	}
 }

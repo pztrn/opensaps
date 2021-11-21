@@ -18,41 +18,65 @@
 package context
 
 import (
-	// stdlib
+	"fmt"
 	"os"
 	"strings"
+	"time"
 
-	// local
+	"github.com/rs/zerolog"
+	"go.dev.pztrn.name/flagger"
 	configurationinterface "go.dev.pztrn.name/opensaps/config/interface"
 	parserinterface "go.dev.pztrn.name/opensaps/parsers/interface"
 	pusherinterface "go.dev.pztrn.name/opensaps/pushers/interface"
 	slackapiserverinterface "go.dev.pztrn.name/opensaps/slack/apiserverinterface"
 	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
-
-	// other
-	"github.com/pztrn/mogrus"
-	"go.dev.pztrn.name/flagger"
 )
 
 type Context struct {
 	Config         configurationinterface.ConfigurationInterface
+	SlackAPIServer slackapiserverinterface.SlackAPIServerInterface
 	Flagger        *flagger.Flagger
-	Log            *mogrus.LoggerHandler
 	Parsers        map[string]parserinterface.ParserInterface
 	Pushers        map[string]pusherinterface.PusherInterface
-	SlackAPIServer slackapiserverinterface.SlackAPIServerInterface
+	Log            zerolog.Logger
 }
 
 func (c *Context) Initialize() {
 	c.Parsers = make(map[string]parserinterface.ParserInterface)
 	c.Pushers = make(map[string]pusherinterface.PusherInterface)
 
-	l := mogrus.New()
-	l.Initialize()
-	c.Log = l.CreateLogger("opensaps")
-	c.Log.CreateOutput("stdout", os.Stdout, true, "debug")
+	// nolint:exhaustivestruct
+	output := zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false, TimeFormat: time.RFC3339}
+	output.FormatLevel = func(lvlRaw interface{}) string {
+		var v string
 
-	c.Flagger = flagger.New("opensaps", flagger.LoggerInterface(c.Log))
+		if lvl, ok := lvlRaw.(string); ok {
+			lvl = strings.ToUpper(lvl)
+			switch lvl {
+			case "DEBUG":
+				v = fmt.Sprintf("\x1b[30m%-5s\x1b[0m", lvl)
+			case "ERROR":
+				v = fmt.Sprintf("\x1b[31m%-5s\x1b[0m", lvl)
+			case "FATAL":
+				v = fmt.Sprintf("\x1b[35m%-5s\x1b[0m", lvl)
+			case "INFO":
+				v = fmt.Sprintf("\x1b[32m%-5s\x1b[0m", lvl)
+			case "PANIC":
+				v = fmt.Sprintf("\x1b[36m%-5s\x1b[0m", lvl)
+			case "WARN":
+				v = fmt.Sprintf("\x1b[33m%-5s\x1b[0m", lvl)
+			default:
+				v = lvl
+			}
+		}
+
+		return fmt.Sprintf("| %s |", v)
+	}
+
+	c.Log = zerolog.New(output).With().Timestamp().Logger()
+
+	flaggerLogger := &FlaggerLogger{log: c.Log}
+	c.Flagger = flagger.New("opensaps", flagger.LoggerInterface(flaggerLogger))
 	c.Flagger.Initialize()
 }
 
@@ -84,7 +108,8 @@ func (c *Context) RegisterSlackAPIServerInterface(sasi slackapiserverinterface.S
 func (c *Context) SendToParser(name string, message slackmessage.SlackMessage) map[string]interface{} {
 	parser, found := c.Parsers[strings.ToLower(name)]
 	if !found {
-		c.Log.Errorf("Parser '%s' not found, will use default one!", name)
+		c.Log.Error().Msgf("Parser '%s' not found, will use default one!", name)
+
 		return c.Parsers["default"].ParseMessage(message)
 	}
 
@@ -94,7 +119,7 @@ func (c *Context) SendToParser(name string, message slackmessage.SlackMessage) m
 func (c *Context) SendToPusher(protocol string, connection string, data slackmessage.SlackMessage) {
 	pusher, ok := c.Pushers[protocol]
 	if !ok {
-		c.Log.Errorf("Pusher not found (or initialized) for protocol '%s'!", protocol)
+		c.Log.Error().Msgf("Pusher not found (or initialized) for protocol '%s'!", protocol)
 	}
 
 	pusher.Push(connection, data)

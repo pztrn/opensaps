@@ -18,12 +18,10 @@
 package main
 
 import (
-	// stdlib
 	"os"
 	"os/signal"
 	"syscall"
 
-	// local
 	"go.dev.pztrn.name/opensaps/config"
 	"go.dev.pztrn.name/opensaps/context"
 	defaultparser "go.dev.pztrn.name/opensaps/parsers/default"
@@ -33,25 +31,25 @@ import (
 )
 
 func main() {
-	c := context.New()
-	c.Initialize()
+	ctx := context.New()
+	ctx.Initialize()
 
-	config.New(c)
+	config.New(ctx)
 
-	c.Log.Infoln("Launching OpenSAPS...")
+	ctx.Log.Info().Msg("Launching OpenSAPS...")
 
-	c.Flagger.Parse()
-	c.Config.InitializeLater()
-	c.Config.LoadConfigurationFromFile()
+	ctx.Flagger.Parse()
+	ctx.Config.InitializeLater()
+	ctx.Config.LoadConfigurationFromFile()
 
-	slack.New(c)
+	slack.New(ctx)
 
 	// Initialize parsers.
-	defaultparser.New(c)
+	defaultparser.New(ctx)
 
 	// Initialize pushers.
-	matrixpusher.New(c)
-	telegrampusher.New(c)
+	matrixpusher.New(ctx)
+	telegrampusher.New(ctx)
 
 	// CTRL+C handler.
 	signalHandler := make(chan os.Signal, 1)
@@ -61,7 +59,7 @@ func main() {
 
 	go func() {
 		<-signalHandler
-		c.Shutdown()
+		ctx.Shutdown()
 		shutdownDone <- true
 	}()
 

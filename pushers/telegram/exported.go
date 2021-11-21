@@ -18,7 +18,6 @@
 package telegrampusher
 
 import (
-	// local
 	"go.dev.pztrn.name/opensaps/context"
 	pusherinterface "go.dev.pztrn.name/opensaps/pushers/interface"
 )

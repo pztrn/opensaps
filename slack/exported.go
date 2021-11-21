@@ -18,10 +18,8 @@
 package slack
 
 import (
-	// stdlib
 	"net/http"
 
-	// local
 	"go.dev.pztrn.name/opensaps/context"
 	slackapiserverinterface "go.dev.pztrn.name/opensaps/slack/apiserverinterface"
 )

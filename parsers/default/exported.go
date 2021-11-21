@@ -18,14 +18,11 @@
 package defaultparser
 
 import (
-	// local
 	"go.dev.pztrn.name/opensaps/context"
 	parserinterface "go.dev.pztrn.name/opensaps/parsers/interface"
 )
 
-var (
-	c *context.Context
-)
+var c *context.Context
 
 func New(cc *context.Context) {
 	c = cc

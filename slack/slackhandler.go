@@ -18,7 +18,6 @@
 package slack
 
 import (
-	// stdlib
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -26,19 +25,18 @@ import (
 	"net/url"
 	"strings"
 
-	// local
 	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
 type Handler struct{}
 
 func (sh Handler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
-	c.Log.Debugf("Received '%s' (empty = GET) request from %s, URL: '%s'", req.Method, req.Host, req.URL.Path)
+	c.Log.Debug().Str("method", req.Method).Str("host", req.Host).Str("path", req.URL.Path).Msg("Received HTTP request")
 
 	// We should catch only POST requests. Otherwise return HTTP 404.
 	if req.Method != "POST" {
-		c.Log.Debugln("Not a POST request, returning HTTP 404")
-		respwriter.WriteHeader(404)
+		c.Log.Debug().Msg("Not a POST request, returning HTTP 404")
+		respwriter.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(respwriter, "NOT FOUND")
 
 		return
@@ -47,18 +45,18 @@ func (sh Handler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
 	body, _ := ioutil.ReadAll(req.Body)
 	req.Body.Close()
 
-	c.Log.Debugf("Received body: %s", string(body))
+	c.Log.Debug().Msgf("Received body: %s", string(body))
 
 	// Try to figure out where we should push received data.
 	cfg := c.Config.GetConfig()
 
-	var sentToPusher bool = false
+	var sentToPusher bool
 
 	for name, config := range cfg.Webhooks {
 		if strings.Contains(req.URL.Path, config.Slack.Random1) &&
 			strings.Contains(req.URL.Path, config.Slack.Random2) &&
 			strings.Contains(req.URL.Path, config.Slack.LongRandom) {
-			c.Log.Debugf("Passed data belongs to '%s' and should go to '%s' pusher, protocol '%s'",
+			c.Log.Debug().Msgf("Passed data belongs to '%s' and should go to '%s' pusher, protocol '%s'",
 				name, config.Remote.PushTo, config.Remote.Pusher)
 			// Parse message into SlackMessage structure.
 			if strings.Contains(string(body)[0:7], "payload") {
@@ -71,7 +69,8 @@ func (sh Handler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
 				// Second - unescape data.
 				tempBody, err := url.QueryUnescape(tempBody)
 				if err != nil {
-					c.Log.Errorln("Failed to decode body into parseable string!")
+					c.Log.Error().Msg("Failed to decode body into parseable string!")
+
 					return
 				}
 
@@ -79,15 +78,17 @@ func (sh Handler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
 				body = []byte(tempBody)
 			}
 
+			// nolint:exhaustivestruct
 			slackmsg := slackmessage.SlackMessage{}
 
 			err := json.Unmarshal(body, &slackmsg)
 			if err != nil {
-				c.Log.Errorf("Failed to decode JSON into SlackMessage struct: '%s'\n", err.Error())
+				c.Log.Error().Err(err).Msg("Failed to decode JSON into SlackMessage struct")
+
 				return
 			}
 
-			c.Log.Debug("Received message:", fmt.Sprintf("%+v", slackmsg))
+			c.Log.Debug().Msgf("Received message: %+v", slackmsg)
 			c.SendToPusher(config.Remote.Pusher, config.Remote.PushTo, slackmsg)
 
 			sentToPusher = true
@@ -95,8 +96,8 @@ func (sh Handler) ServeHTTP(respwriter http.ResponseWriter, req *http.Request) {
 	}
 
 	if !sentToPusher {
-		c.Log.Debug("Don't know where to push data. Ignoring with HTTP 404")
-		respwriter.WriteHeader(404)
+		c.Log.Debug().Msg("Don't know where to push data. Ignoring with HTTP 404")
+		respwriter.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(respwriter, "NOT FOUND")
 	}
 }

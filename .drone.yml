@@ -5,14 +5,14 @@ name: build
 
 steps:
   - name: lint
-    image: golangci/golangci-lint:latest
+    image: golangci/golangci-lint:v1.43.0
     environment:
       CGO_ENABLED: 0
     commands:
       - golangci-lint run
 
   - name: test
-    image: golang:1.13.5-alpine
+    image: golang:1.17.3-alpine
     environment:
       CGO_ENABLED: 0
     commands:
@@ -21,7 +21,7 @@ steps:
   - name: docker
     image: plugins/docker
     when:
-      branch: master
+      branch: ["master"]
     settings:
       username:
         from_secret: dockerhub_user

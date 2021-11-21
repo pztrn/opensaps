@@ -17,14 +17,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package slackmessage
 
+// nolint:tagliatelle
 type SlackMessage struct {
 	Channel     string             `json:"channel"`
 	Text        string             `json:"text"`
 	Username    string             `json:"username"`
 	IconURL     string             `json:"icon_url"`
+	Attachments []SlackAttachments `json:"attachments"`
 	UnfurlLinks int                `json:"unfurl_links"`
 	LinkNames   int                `json:"link_names"`
-	Attachments []SlackAttachments `json:"attachments"`
 }
 
 type SlackAttachments struct {

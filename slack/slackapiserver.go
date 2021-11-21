@@ -29,8 +29,6 @@ package slack
 // handler for it.
 
 import (
-	// stdlib
-
 	"context"
 	"net/http"
 	"time"
@@ -39,7 +37,7 @@ import (
 type APIServer struct{}
 
 func (sh APIServer) Initialize() {
-	c.Log.Infoln("Initializing Slack API handler...")
+	c.Log.Info().Msg("Initializing Slack API handler...")
 
 	// Start HTTP server.
 	// As OpenSAPS designed to be behind some proxy (nginx, Caddy, etc.)
@@ -48,6 +46,7 @@ func (sh APIServer) Initialize() {
 	// Don't send pull requests, patches, don't create issues! :)
 	cfg := c.Config.GetConfig()
 
+	// nolint:exhaustivestruct,gomnd
 	httpsrv = &http.Server{
 		Addr: cfg.SlackHandler.Listener.Address,
 		// This handler will figure out from where request has come and will
@@ -63,13 +62,13 @@ func (sh APIServer) Initialize() {
 		_ = httpsrv.ListenAndServe()
 	}()
 
-	c.Log.Infof("Slack Webhooks API server starting to listen on %s", cfg.SlackHandler.Listener.Address)
+	c.Log.Info().Str("address", cfg.SlackHandler.Listener.Address).Msg("Starting Slack Webhooks API server")
 }
 
 func (sh APIServer) Shutdown() {
-	c.Log.Infoln("Shutting down Slack API handler...")
+	c.Log.Info().Msg("Shutting down Slack API handler...")
 
 	_ = httpsrv.Shutdown(context.TODO())
 
-	c.Log.Infoln("Slack API HTTP server shutted down")
+	c.Log.Info().Msg("Slack API HTTP server shutted down")
 }

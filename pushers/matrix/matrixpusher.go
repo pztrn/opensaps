@@ -19,18 +19,18 @@ package matrixpusher
 
 import slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 
-// local
-
 type MatrixPusher struct{}
 
 func (mp MatrixPusher) Initialize() {
-	c.Log.Infoln("Initializing Matrix protocol pusher...")
+	c.Log.Info().Msg("Initializing Matrix protocol pusher...")
 
 	// Get configuration for pushers and initialize every connection.
 	cfg := c.Config.GetConfig()
 	for name, config := range cfg.Matrix {
-		c.Log.Infof("Initializing connection: '%s'", name)
+		c.Log.Info().Str("conn", name).Msg("Initializing connection...")
 
+		// Fields will be filled with conn.Initialize().
+		// nolint:exhaustivestruct
 		conn := MatrixConnection{}
 		connections[name] = &conn
 
@@ -41,16 +41,17 @@ func (mp MatrixPusher) Initialize() {
 func (mp MatrixPusher) Push(connection string, data slackmessage.SlackMessage) {
 	conn, found := connections[connection]
 	if !found {
-		c.Log.Errorf("Connection not found: '%s'!", connection)
+		c.Log.Error().Str("conn", connection).Msg("Connection not found!")
+
 		return
 	}
 
-	c.Log.Debugf("Pushing data to '%s'", connection)
+	c.Log.Debug().Str("conn", connection).Msg("Pushing data to connection")
 	conn.ProcessMessage(data)
 }
 
 func (mp MatrixPusher) Shutdown() {
-	c.Log.Infoln("Shutting down Matrix pusher...")
+	c.Log.Info().Msg("Shutting down Matrix pusher...")
 
 	for _, conn := range connections {
 		conn.Shutdown()

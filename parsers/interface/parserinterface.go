@@ -18,7 +18,6 @@
 package parserinterface
 
 import (
-	// local
 	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 

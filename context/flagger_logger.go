@@ -15,24 +15,26 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-package config
+
+package context
 
 import (
-	configurationinterface "go.dev.pztrn.name/opensaps/config/interface"
-	configstruct "go.dev.pztrn.name/opensaps/config/struct"
-	"go.dev.pztrn.name/opensaps/context"
+	"fmt"
+
+	"github.com/rs/zerolog"
 )
 
-var (
-	c *context.Context
-	// Temporary configuration.
-	tempconfig map[string]string
-	// Configuration from YAML file.
-	config *configstruct.ConfigStruct
-)
+// FlaggerLogger is a proxy structure for logging for flagger package.
+type FlaggerLogger struct {
+	log zerolog.Logger
+}
 
-func New(cc *context.Context) {
-	c = cc
-	conf := Configuration{}
-	c.RegisterConfigurationInterface(configurationinterface.ConfigurationInterface(conf))
+func (fl *FlaggerLogger) Fatal(v ...interface{}) {
+	msg := fmt.Sprint(v...)
+	fl.log.Fatal().Msg(msg)
+}
+
+func (fl *FlaggerLogger) Print(v ...interface{}) {
+	msg := fmt.Sprint(v...)
+	fl.log.Info().Msg(msg)
 }

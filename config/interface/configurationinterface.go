@@ -18,7 +18,6 @@
 package configurationinterface
 
 import (
-	// local
 	configstruct "go.dev.pztrn.name/opensaps/config/struct"
 )
 

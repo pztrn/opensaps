@@ -18,18 +18,13 @@
 package config
 
 import (
-	// stdlib
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os/user"
 	"strings"
 
-	// local
-	configstruct "go.dev.pztrn.name/opensaps/config/struct"
-
-	// other
 	"go.dev.pztrn.name/flagger"
+	configstruct "go.dev.pztrn.name/opensaps/config/struct"
 	"gopkg.in/yaml.v2"
 )
 
@@ -45,6 +40,8 @@ func (conf Configuration) GetConfig() *configstruct.ConfigStruct {
 func (conf Configuration) GetTempValue(key string) (string, error) {
 	value, found := tempconfig[key]
 	if !found {
+		// ToDo: fix it!
+		// nolint:goerr113
 		return "", errors.New("No such key in temporary configuration storage: " + key)
 	}
 
@@ -53,7 +50,7 @@ func (conf Configuration) GetTempValue(key string) (string, error) {
 	if value[0] == '~' {
 		usr, err := user.Current()
 		if err != nil {
-			c.Log.Fatalln("Failed to get current user data: " + err.Error())
+			c.Log.Fatal().Err(err).Msg("Failed to get current user data")
 		}
 
 		value = strings.Replace(value, "~", usr.HomeDir, 1)
@@ -63,7 +60,7 @@ func (conf Configuration) GetTempValue(key string) (string, error) {
 }
 
 func (conf Configuration) Initialize() {
-	c.Log.Infoln("Initializing configuration storage...")
+	c.Log.Info().Msg("Initializing configuration storage...")
 
 	tempconfig = make(map[string]string)
 
@@ -79,21 +76,21 @@ func (conf Configuration) Initialize() {
 
 // Initializes configuration root path for later usage.
 func (conf Configuration) initializeConfigurationFilePath() {
-	c.Log.Debugln("Asking flagger about configuration root path supplied by user...")
+	c.Log.Debug().Msg("Asking flagger about configuration root path supplied by user...")
 
 	configpath, err := c.Flagger.GetStringValue("config")
 	if err != nil {
-		c.Log.Fatalln("Something went wrong - Flagger doesn't know about \"-config\" parameter!")
+		c.Log.Fatal().Msg("Something went wrong - Flagger doesn't know about \"-config\" parameter!")
 	}
 
-	c.Log.Infoln("Will use configuration file: '" + configpath + "'")
+	c.Log.Info().Msg("Will use configuration file: '" + configpath + "'")
 	conf.SetTempValue("CONFIGURATION_FILE", configpath)
 }
 
 // Asking Flagger about flags, initialize internal variables.
 // Should be called **after** Flagger.Parse().
 func (conf Configuration) InitializeLater() {
-	c.Log.Infoln("Completing configuration initialization...")
+	c.Log.Info().Msg("Completing configuration initialization...")
 
 	conf.initializeConfigurationFilePath()
 }
@@ -102,25 +99,26 @@ func (conf Configuration) InitializeLater() {
 func (conf Configuration) LoadConfigurationFromFile() {
 	configpath, err := conf.GetTempValue("CONFIGURATION_FILE")
 	if err != nil {
-		c.Log.Fatalln("Failed to get configuration file path from internal temporary configuration storage! OpenSAPS is BROKEN!")
+		c.Log.Fatal().Msg("Failed to get configuration file path from internal temporary configuration storage! OpenSAPS is BROKEN!")
 	}
 
-	c.Log.Infof("Loading configuration from '%s'...", configpath)
+	c.Log.Info().Msgf("Loading configuration from '%s'...", configpath)
 
 	// Read file into memory.
 	configBytes, err1 := ioutil.ReadFile(configpath)
 	if err1 != nil {
-		c.Log.Fatalf("Error occurred while reading configuration file: %s", err1.Error())
+		c.Log.Fatal().Msgf("Error occurred while reading configuration file: %s", err1.Error())
 	}
 
+	// nolint:exhaustivestruct
 	config = &configstruct.ConfigStruct{}
 	// Parse YAML.
 	err2 := yaml.Unmarshal(configBytes, config)
 	if err2 != nil {
-		c.Log.Fatalf("Failed to parse configuration file: %s", err2.Error())
+		c.Log.Fatal().Msgf("Failed to parse configuration file: %s", err2.Error())
 	}
 
-	c.Log.Debugln("Loaded configuration:", fmt.Sprintf("%+v", config))
+	c.Log.Debug().Msgf("Loaded configuration: %+v", config)
 }
 
 // Sets value to key in temporary configuration storage.

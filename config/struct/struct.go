@@ -16,14 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// nolint:tagliatelle
 package configstruct
 
 // ConfigStruct is a config's root.
 type ConfigStruct struct {
-	SlackHandler ConfigSlackHandler        `yaml:"slackhandler"`
 	Webhooks     map[string]ConfigWebhook  `yaml:"webhooks"`
 	Matrix       map[string]ConfigMatrix   `yaml:"matrix"`
 	Telegram     map[string]ConfigTelegram `yaml:"telegram"`
+	SlackHandler ConfigSlackHandler        `yaml:"slackhandler"`
 }
 
 // Slack handler configuration.
@@ -60,7 +61,7 @@ type ConfigMatrix struct {
 	Room     string `yaml:"room"`
 }
 
-// ConfigTelegram is a telegram pusher configuration
+// ConfigTelegram is a telegram pusher configuration.
 type ConfigTelegram struct {
 	BotID  string      `yaml:"bot_id"`
 	ChatID string      `yaml:"chat_id"`
@@ -69,10 +70,9 @@ type ConfigTelegram struct {
 
 // ConfigProxy represents proxy server configuration.
 type ConfigProxy struct {
-	// ProxyType is a proxy type. Currently ignored.
-	Enabled   bool   `yaml:"enabled"`
 	ProxyType string `yaml:"proxy_type"`
 	Address   string `yaml:"address"`
 	User      string `yaml:"user"`
 	Password  string `yaml:"password"`
+	Enabled   bool   `yaml:"enabled"`
 }

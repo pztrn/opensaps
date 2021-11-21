@@ -18,22 +18,20 @@
 package defaultparser
 
 import (
-	// stdlib
 	"regexp"
 	"strings"
 
-	// local
 	slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 )
 
 type DefaultParser struct{}
 
 func (dp DefaultParser) Initialize() {
-	c.Log.Infoln("Initializing default parser...")
+	c.Log.Info().Msg("Initializing default parser...")
 }
 
 func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[string]interface{} {
-	c.Log.Debugln("Parsing default message...")
+	c.Log.Debug().Msg("Parsing default message...")
 
 	msg := message.Text + "\n"
 	for _, attachment := range message.Attachments {
@@ -42,7 +40,7 @@ func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[stri
 
 	// Remove line break in very beginning, if present.
 	if strings.Contains(msg[0:3], "\n") {
-		c.Log.Debugln("Initial br found, removing")
+		c.Log.Debug().Msg("Initial br found, removing")
 
 		msg = strings.Replace(msg, "\n", "", 1)
 	}
@@ -50,7 +48,7 @@ func (dp DefaultParser) ParseMessage(message slackmessage.SlackMessage) map[stri
 	// Get all links from message.
 	r := regexp.MustCompile(`<{1}([\pL\pP\pN]+)\|{1}([\pL\pP\pN\pZs]+)>{1}`)
 	foundLinks := r.FindAllStringSubmatch(msg, -1)
-	c.Log.Debugln("Found links:", foundLinks)
+	c.Log.Debug().Msgf("Found links: %+v", foundLinks)
 
 	data := make(map[string]interface{})
 	data["message"] = msg
