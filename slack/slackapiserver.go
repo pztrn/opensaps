@@ -37,16 +37,16 @@ import (
 type APIServer struct{}
 
 func (sh APIServer) Initialize() {
-	c.Log.Info().Msg("Initializing Slack API handler...")
+	ctx.Log.Info().Msg("Initializing Slack API handler...")
 
 	// Start HTTP server.
 	// As OpenSAPS designed to be behind some proxy (nginx, Caddy, etc.)
 	// we will listen only to plain HTTP.
 	// Note to those who wants HTTPS - proxify with nginx, Caddy, etc!
 	// Don't send pull requests, patches, don't create issues! :)
-	cfg := c.Config.GetConfig()
+	cfg := ctx.Config.GetConfig()
 
-	// nolint:exhaustivestruct,gomnd
+	// nolint:exhaustruct,gomnd
 	httpsrv = &http.Server{
 		Addr: cfg.SlackHandler.Listener.Address,
 		// This handler will figure out from where request has come and will
@@ -62,13 +62,13 @@ func (sh APIServer) Initialize() {
 		_ = httpsrv.ListenAndServe()
 	}()
 
-	c.Log.Info().Str("address", cfg.SlackHandler.Listener.Address).Msg("Starting Slack Webhooks API server")
+	ctx.Log.Info().Str("address", cfg.SlackHandler.Listener.Address).Msg("Starting Slack Webhooks API server")
 }
 
 func (sh APIServer) Shutdown() {
-	c.Log.Info().Msg("Shutting down Slack API handler...")
+	ctx.Log.Info().Msg("Shutting down Slack API handler...")
 
 	_ = httpsrv.Shutdown(context.TODO())
 
-	c.Log.Info().Msg("Slack API HTTP server shutted down")
+	ctx.Log.Info().Msg("Slack API HTTP server shutted down")
 }

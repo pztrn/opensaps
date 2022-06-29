@@ -25,13 +25,13 @@ import (
 )
 
 var (
-	c *context.Context
+	ctx *context.Context
 	// HTTP server.
 	httpsrv *http.Server
 )
 
 func New(cc *context.Context) {
-	c = cc
+	ctx = cc
 	sh := APIServer{}
-	c.RegisterSlackAPIServerInterface(slackapiserverinterface.SlackAPIServerInterface(sh))
+	ctx.RegisterSlackAPIServerInterface(slackapiserverinterface.SlackAPIServerInterface(sh))
 }

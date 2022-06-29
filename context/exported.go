@@ -18,6 +18,6 @@
 package context
 
 func New() *Context {
-	// nolint:exhaustivestruct
+	// nolint:exhaustruct
 	return &Context{}
 }

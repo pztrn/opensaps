@@ -23,14 +23,14 @@ import (
 )
 
 var (
-	c           *context.Context
+	ctx         *context.Context
 	connections map[string]*TelegramConnection
 )
 
 func New(cc *context.Context) {
-	c = cc
+	ctx = cc
 	connections = make(map[string]*TelegramConnection)
 
 	tp := TelegramPusher{}
-	c.RegisterPusherInterface("telegram", pusherinterface.PusherInterface(tp))
+	ctx.RegisterPusherInterface("telegram", pusherinterface.PusherInterface(tp))
 }

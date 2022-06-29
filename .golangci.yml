@@ -8,6 +8,8 @@ linters:
     - gochecknoglobals
     # This linter goes crazy for nothing (almost).
     - funlen
+    # Deprecated things.
+    - exhaustivestruct
 linters-settings:
   lll:
     line-length: 128

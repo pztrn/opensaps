@@ -37,7 +37,7 @@ func (tc *TelegramConnection) Initialize(connName string, cfg configstruct.Confi
 
 func (tc *TelegramConnection) ProcessMessage(message slackmessage.SlackMessage) {
 	// Prepare message body.
-	messageData := c.SendToParser(message.Username, message)
+	messageData := ctx.SendToParser(message.Username, message)
 
 	messageToSend, _ := messageData["message"].(string)
 	// We'll use HTML, so reformat links accordingly (if any).
@@ -49,7 +49,7 @@ func (tc *TelegramConnection) ProcessMessage(message slackmessage.SlackMessage) 
 		}
 	}
 
-	c.Log.Debug().Msgf("Crafted message: %s", messageToSend)
+	ctx.Log.Debug().Msgf("Crafted message: %s", messageToSend)
 
 	// Send message.
 	tc.SendMessage(messageToSend)
@@ -62,7 +62,7 @@ func (tc *TelegramConnection) SendMessage(message string) {
 	msgdata.Set("parse_mode", "HTML")
 
 	// Are we should use proxy?
-	// nolint:exhaustivestruct
+	// nolint:exhaustruct
 	httpTransport := &http.Transport{}
 
 	// nolint:nestif
@@ -82,30 +82,30 @@ func (tc *TelegramConnection) SendMessage(message string) {
 
 		proxyURLParsed, err := url.Parse(proxyURL)
 		if err != nil {
-			c.Log.Error().Err(err).Msg("Error while constructing/parsing proxy URL")
+			ctx.Log.Error().Err(err).Msg("Error while constructing/parsing proxy URL")
 		} else {
 			httpTransport.Proxy = http.ProxyURL(proxyURLParsed)
 		}
 	}
 
-	// nolint:exhaustivestruct
+	// nolint:exhaustruct
 	client := &http.Client{Transport: httpTransport}
 	botURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tc.config.BotID)
 
-	c.Log.Debug().Msgf("Bot URL: %s", botURL)
+	ctx.Log.Debug().Msgf("Bot URL: %s", botURL)
 
 	// ToDo: fix it.
 	// nolint
 	response, err := client.PostForm(botURL, msgdata)
 	if err != nil {
-		c.Log.Error().Err(err).Msg("Error occurred while sending data to Telegram")
+		ctx.Log.Error().Err(err).Msg("Error occurred while sending data to Telegram")
 	} else {
-		c.Log.Debug().Msgf("Status: %s", response.Status)
+		ctx.Log.Debug().Msgf("Status: %s", response.Status)
 		if response.StatusCode != http.StatusOK {
 			body := []byte{}
 			_, _ = response.Body.Read(body)
 			response.Body.Close()
-			c.Log.Debug().Msg(string(body))
+			ctx.Log.Debug().Msg(string(body))
 		}
 	}
 }

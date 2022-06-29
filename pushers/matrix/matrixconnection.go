@@ -64,14 +64,14 @@ type MatrixConnection struct {
 
 // nolint
 func (mxc *MatrixConnection) doPostRequest(endpoint string, data string) ([]byte, error) {
-	c.Log.Debug().Msgf("Data to send: %+v", data)
+	ctx.Log.Debug().Msgf("Data to send: %+v", data)
 
 	apiRoot := mxc.apiRoot + endpoint
 	if mxc.token != "" {
 		apiRoot += fmt.Sprintf("?access_token=%s", mxc.token)
 	}
 
-	c.Log.Debug().Msgf("Request URL: %s", apiRoot)
+	ctx.Log.Debug().Msgf("Request URL: %s", apiRoot)
 
 	req, _ := http.NewRequest("POST", apiRoot, bytes.NewBuffer([]byte(data)))
 	req.Header.Set("Content-Type", "application/json")
@@ -97,14 +97,14 @@ func (mxc *MatrixConnection) doPostRequest(endpoint string, data string) ([]byte
 
 // nolint
 func (mxc *MatrixConnection) doPutRequest(endpoint string, data string) ([]byte, error) {
-	c.Log.Debug().Msgf("Data to send: %+v", data)
+	ctx.Log.Debug().Msgf("Data to send: %+v", data)
 
 	apiRoot := mxc.apiRoot + endpoint
 	if mxc.token != "" {
 		apiRoot += fmt.Sprintf("?access_token=%s", mxc.token)
 	}
 
-	c.Log.Debug().Msgf("Request URL: %s", apiRoot)
+	ctx.Log.Debug().Msgf("Request URL: %s", apiRoot)
 
 	req, _ := http.NewRequest("PUT", apiRoot, bytes.NewBuffer([]byte(data)))
 	req.Header.Set("Content-Type", "application/json")
@@ -160,7 +160,7 @@ func (mxc *MatrixConnection) generateTnxIDSecureBytes(length int) []byte {
 	randomBytes := make([]byte, length)
 
 	if _, err := crand.Read(randomBytes); err != nil {
-		c.Log.Fatal().Msg("Unable to generate random bytes for transaction ID!")
+		ctx.Log.Fatal().Msg("Unable to generate random bytes for transaction ID!")
 	}
 
 	return randomBytes
@@ -174,15 +174,15 @@ func (mxc *MatrixConnection) Initialize(connName string, apiRoot string, user st
 	mxc.roomID = roomID
 	mxc.token = ""
 
-	c.Log.Debug().Str("conn", mxc.connName).Str("api_root", apiRoot).Msg("Trying to connect server")
+	ctx.Log.Debug().Str("conn", mxc.connName).Str("api_root", apiRoot).Msg("Trying to connect server")
 
 	loginStr := fmt.Sprintf(`{"type": "m.login.password", "user": "%s", "password": "%s"}`, mxc.username, mxc.password)
 
-	c.Log.Debug().Msgf("Login string: %s", loginStr)
+	ctx.Log.Debug().Msgf("Login string: %s", loginStr)
 
 	reply, err := mxc.doPostRequest("/login", loginStr)
 	if err != nil {
-		c.Log.Fatal().Msgf("Failed to login to Matrix with user '%s' (conn %s): '%s'", mxc.username, mxc.connName, err.Error())
+		ctx.Log.Fatal().Msgf("Failed to login to Matrix with user '%s' (conn %s): '%s'", mxc.username, mxc.connName, err.Error())
 	}
 
 	// Parse received JSON and get access token.
@@ -190,7 +190,7 @@ func (mxc *MatrixConnection) Initialize(connName string, apiRoot string, user st
 
 	err1 := json.Unmarshal(reply, &data)
 	if err1 != nil {
-		c.Log.Fatal().
+		ctx.Log.Fatal().
 			Str("username", mxc.username).
 			Str("conn", mxc.connName).
 			Err(err).
@@ -200,14 +200,14 @@ func (mxc *MatrixConnection) Initialize(connName string, apiRoot string, user st
 	mxc.token, _ = data["access_token"].(string)
 	mxc.deviceID, _ = data["deviceID"].(string)
 
-	c.Log.Debug().Str("conn", mxc.connName).Str("access_token", mxc.token).Str("device_id", mxc.deviceID).Msg("Login successful")
+	ctx.Log.Debug().Str("conn", mxc.connName).Str("access_token", mxc.token).Str("device_id", mxc.deviceID).Msg("Login successful")
 
 	// We should check if we're already in room and, if not, join it.
 	// We will do this by simply trying to join. We don't care about reply
 	// here.
 	_, err2 := mxc.doPostRequest("/rooms/"+mxc.roomID+"/join", "{}")
 	if err2 != nil {
-		c.Log.Fatal().Err(err).Msg("Failed to join room")
+		ctx.Log.Fatal().Err(err).Msg("Failed to join room")
 	}
 }
 
@@ -215,7 +215,7 @@ func (mxc *MatrixConnection) Initialize(connName string, apiRoot string, user st
 // It will prepare a message which will be passed to mxc.SendMessage().
 func (mxc *MatrixConnection) ProcessMessage(message slackmessage.SlackMessage) {
 	// Prepare message body.
-	messageData := c.SendToParser(message.Username, message)
+	messageData := ctx.SendToParser(message.Username, message)
 
 	messageToSend, _ := messageData["message"].(string)
 	// We'll use HTML, so reformat links accordingly (if any).
@@ -230,7 +230,7 @@ func (mxc *MatrixConnection) ProcessMessage(message slackmessage.SlackMessage) {
 	// "\n" should be "<br>".
 	messageToSend = strings.ReplaceAll(messageToSend, "\n", "<br>")
 
-	c.Log.Debug().Msgf("Crafted message: %s", messageToSend)
+	ctx.Log.Debug().Msgf("Crafted message: %s", messageToSend)
 
 	// Send message.
 	mxc.SendMessage(messageToSend)
@@ -238,7 +238,7 @@ func (mxc *MatrixConnection) ProcessMessage(message slackmessage.SlackMessage) {
 
 // This function sends already prepared message to room.
 func (mxc *MatrixConnection) SendMessage(message string) {
-	c.Log.Debug().Str("conn", mxc.connName).Msgf("Sending message: '%s'", message)
+	ctx.Log.Debug().Str("conn", mxc.connName).Msgf("Sending message: '%s'", message)
 
 	// We should send notices as it is preferred behavior for bots and
 	// appservices.
@@ -251,7 +251,7 @@ func (mxc *MatrixConnection) SendMessage(message string) {
 
 	msgBytes, err := json.Marshal(&msg)
 	if err != nil {
-		c.Log.Error().Err(err).Msg("Failed to marshal message into JSON.")
+		ctx.Log.Error().Err(err).Msg("Failed to marshal message into JSON.")
 
 		return
 	}
@@ -260,20 +260,20 @@ func (mxc *MatrixConnection) SendMessage(message string) {
 
 	reply, err := mxc.doPutRequest("/rooms/"+mxc.roomID+"/send/m.room.message/"+mxc.generateTnxID(), msgStr)
 	if err != nil {
-		c.Log.Fatal().Str("conn", mxc.connName).Str("room", mxc.roomID).Err(err).Msg("Failed to send message to room")
+		ctx.Log.Fatal().Str("conn", mxc.connName).Str("room", mxc.roomID).Err(err).Msg("Failed to send message to room")
 	}
 
-	c.Log.Debug().Msgf("Message sent, reply: %s", string(reply))
+	ctx.Log.Debug().Msgf("Message sent, reply: %s", string(reply))
 }
 
 func (mxc *MatrixConnection) Shutdown() {
-	c.Log.Info().Str("conn", mxc.connName).Msg("Shutting down connection...")
+	ctx.Log.Info().Str("conn", mxc.connName).Msg("Shutting down connection...")
 
 	_, err := mxc.doPostRequest("/logout", "{}")
 	if err != nil {
-		c.Log.Error().Err(err).Str("conn", mxc.connName).Msg("Error occurred while trying to log out from Matrix.")
+		ctx.Log.Error().Err(err).Str("conn", mxc.connName).Msg("Error occurred while trying to log out from Matrix.")
 	}
 
 	mxc.token = ""
-	c.Log.Info().Str("conn", mxc.connName).Msg("Connection successfully shutted down")
+	ctx.Log.Info().Str("conn", mxc.connName).Msg("Connection successfully shutted down")
 }

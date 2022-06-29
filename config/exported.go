@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	c *context.Context
+	ctx *context.Context
 	// Temporary configuration.
 	tempconfig map[string]string
 	// Configuration from YAML file.
@@ -32,7 +32,7 @@ var (
 )
 
 func New(cc *context.Context) {
-	c = cc
+	ctx = cc
 	conf := Configuration{}
-	c.RegisterConfigurationInterface(configurationinterface.ConfigurationInterface(conf))
+	ctx.RegisterConfigurationInterface(configurationinterface.ConfigurationInterface(conf))
 }

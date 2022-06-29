@@ -22,15 +22,15 @@ import slackmessage "go.dev.pztrn.name/opensaps/slack/message"
 type MatrixPusher struct{}
 
 func (mp MatrixPusher) Initialize() {
-	c.Log.Info().Msg("Initializing Matrix protocol pusher...")
+	ctx.Log.Info().Msg("Initializing Matrix protocol pusher...")
 
 	// Get configuration for pushers and initialize every connection.
-	cfg := c.Config.GetConfig()
+	cfg := ctx.Config.GetConfig()
 	for name, config := range cfg.Matrix {
-		c.Log.Info().Str("conn", name).Msg("Initializing connection...")
+		ctx.Log.Info().Str("conn", name).Msg("Initializing connection...")
 
 		// Fields will be filled with conn.Initialize().
-		// nolint:exhaustivestruct
+		// nolint:exhaustruct
 		conn := MatrixConnection{}
 		connections[name] = &conn
 
@@ -41,17 +41,17 @@ func (mp MatrixPusher) Initialize() {
 func (mp MatrixPusher) Push(connection string, data slackmessage.SlackMessage) {
 	conn, found := connections[connection]
 	if !found {
-		c.Log.Error().Str("conn", connection).Msg("Connection not found!")
+		ctx.Log.Error().Str("conn", connection).Msg("Connection not found!")
 
 		return
 	}
 
-	c.Log.Debug().Str("conn", connection).Msg("Pushing data to connection")
+	ctx.Log.Debug().Str("conn", connection).Msg("Pushing data to connection")
 	conn.ProcessMessage(data)
 }
 
 func (mp MatrixPusher) Shutdown() {
-	c.Log.Info().Msg("Shutting down Matrix pusher...")
+	ctx.Log.Info().Msg("Shutting down Matrix pusher...")
 
 	for _, conn := range connections {
 		conn.Shutdown()

@@ -45,32 +45,32 @@ func (c *Context) Initialize() {
 	c.Parsers = make(map[string]parserinterface.ParserInterface)
 	c.Pushers = make(map[string]pusherinterface.PusherInterface)
 
-	// nolint:exhaustivestruct
+	// nolint:exhaustruct
 	output := zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false, TimeFormat: time.RFC3339}
 	output.FormatLevel = func(lvlRaw interface{}) string {
-		var v string
+		var formattedLvl string
 
 		if lvl, ok := lvlRaw.(string); ok {
 			lvl = strings.ToUpper(lvl)
 			switch lvl {
 			case "DEBUG":
-				v = fmt.Sprintf("\x1b[30m%-5s\x1b[0m", lvl)
+				formattedLvl = fmt.Sprintf("\x1b[30m%-5s\x1b[0m", lvl)
 			case "ERROR":
-				v = fmt.Sprintf("\x1b[31m%-5s\x1b[0m", lvl)
+				formattedLvl = fmt.Sprintf("\x1b[31m%-5s\x1b[0m", lvl)
 			case "FATAL":
-				v = fmt.Sprintf("\x1b[35m%-5s\x1b[0m", lvl)
+				formattedLvl = fmt.Sprintf("\x1b[35m%-5s\x1b[0m", lvl)
 			case "INFO":
-				v = fmt.Sprintf("\x1b[32m%-5s\x1b[0m", lvl)
+				formattedLvl = fmt.Sprintf("\x1b[32m%-5s\x1b[0m", lvl)
 			case "PANIC":
-				v = fmt.Sprintf("\x1b[36m%-5s\x1b[0m", lvl)
+				formattedLvl = fmt.Sprintf("\x1b[36m%-5s\x1b[0m", lvl)
 			case "WARN":
-				v = fmt.Sprintf("\x1b[33m%-5s\x1b[0m", lvl)
+				formattedLvl = fmt.Sprintf("\x1b[33m%-5s\x1b[0m", lvl)
 			default:
-				v = lvl
+				formattedLvl = lvl
 			}
 		}
 
-		return fmt.Sprintf("| %s |", v)
+		return fmt.Sprintf("| %s |", formattedLvl)
 	}
 
 	c.Log = zerolog.New(output).With().Timestamp().Logger()

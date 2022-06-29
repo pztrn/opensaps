@@ -50,7 +50,7 @@ func (conf Configuration) GetTempValue(key string) (string, error) {
 	if value[0] == '~' {
 		usr, err := user.Current()
 		if err != nil {
-			c.Log.Fatal().Err(err).Msg("Failed to get current user data")
+			ctx.Log.Fatal().Err(err).Msg("Failed to get current user data")
 		}
 
 		value = strings.Replace(value, "~", usr.HomeDir, 1)
@@ -60,7 +60,7 @@ func (conf Configuration) GetTempValue(key string) (string, error) {
 }
 
 func (conf Configuration) Initialize() {
-	c.Log.Info().Msg("Initializing configuration storage...")
+	ctx.Log.Info().Msg("Initializing configuration storage...")
 
 	tempconfig = make(map[string]string)
 
@@ -71,26 +71,26 @@ func (conf Configuration) Initialize() {
 		DefaultValue: "~/.config/OpenSAPS/config.yaml",
 	}
 
-	_ = c.Flagger.AddFlag(&flagConfigpath)
+	_ = ctx.Flagger.AddFlag(&flagConfigpath)
 }
 
 // Initializes configuration root path for later usage.
 func (conf Configuration) initializeConfigurationFilePath() {
-	c.Log.Debug().Msg("Asking flagger about configuration root path supplied by user...")
+	ctx.Log.Debug().Msg("Asking flagger about configuration root path supplied by user...")
 
-	configpath, err := c.Flagger.GetStringValue("config")
+	configpath, err := ctx.Flagger.GetStringValue("config")
 	if err != nil {
-		c.Log.Fatal().Msg("Something went wrong - Flagger doesn't know about \"-config\" parameter!")
+		ctx.Log.Fatal().Msg("Something went wrong - Flagger doesn't know about \"-config\" parameter!")
 	}
 
-	c.Log.Info().Msg("Will use configuration file: '" + configpath + "'")
+	ctx.Log.Info().Msg("Will use configuration file: '" + configpath + "'")
 	conf.SetTempValue("CONFIGURATION_FILE", configpath)
 }
 
 // Asking Flagger about flags, initialize internal variables.
 // Should be called **after** Flagger.Parse().
 func (conf Configuration) InitializeLater() {
-	c.Log.Info().Msg("Completing configuration initialization...")
+	ctx.Log.Info().Msg("Completing configuration initialization...")
 
 	conf.initializeConfigurationFilePath()
 }
@@ -99,26 +99,27 @@ func (conf Configuration) InitializeLater() {
 func (conf Configuration) LoadConfigurationFromFile() {
 	configpath, err := conf.GetTempValue("CONFIGURATION_FILE")
 	if err != nil {
-		c.Log.Fatal().Msg("Failed to get configuration file path from internal temporary configuration storage! OpenSAPS is BROKEN!")
+		ctx.Log.Fatal().
+			Msg("Failed to get configuration file path from internal temporary configuration storage! OpenSAPS is BROKEN!")
 	}
 
-	c.Log.Info().Msgf("Loading configuration from '%s'...", configpath)
+	ctx.Log.Info().Msgf("Loading configuration from '%s'...", configpath)
 
 	// Read file into memory.
 	configBytes, err1 := ioutil.ReadFile(configpath)
 	if err1 != nil {
-		c.Log.Fatal().Msgf("Error occurred while reading configuration file: %s", err1.Error())
+		ctx.Log.Fatal().Msgf("Error occurred while reading configuration file: %s", err1.Error())
 	}
 
-	// nolint:exhaustivestruct
+	// nolint:exhaustruct
 	config = &configstruct.ConfigStruct{}
 	// Parse YAML.
 	err2 := yaml.Unmarshal(configBytes, config)
 	if err2 != nil {
-		c.Log.Fatal().Msgf("Failed to parse configuration file: %s", err2.Error())
+		ctx.Log.Fatal().Msgf("Failed to parse configuration file: %s", err2.Error())
 	}
 
-	c.Log.Debug().Msgf("Loaded configuration: %+v", config)
+	ctx.Log.Debug().Msgf("Loaded configuration: %+v", config)
 }
 
 // Sets value to key in temporary configuration storage.

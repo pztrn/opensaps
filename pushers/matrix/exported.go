@@ -23,14 +23,14 @@ import (
 )
 
 var (
-	c           *context.Context
+	ctx         *context.Context
 	connections map[string]*MatrixConnection
 )
 
 func New(cc *context.Context) {
-	c = cc
+	ctx = cc
 	connections = make(map[string]*MatrixConnection)
 
 	mp := MatrixPusher{}
-	c.RegisterPusherInterface("matrix", pusherinterface.PusherInterface(mp))
+	ctx.RegisterPusherInterface("matrix", pusherinterface.PusherInterface(mp))
 }

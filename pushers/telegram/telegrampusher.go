@@ -24,14 +24,14 @@ import (
 type TelegramPusher struct{}
 
 func (tp TelegramPusher) Initialize() {
-	c.Log.Info().Msg("Initializing Telegram protocol pusher...")
+	ctx.Log.Info().Msg("Initializing Telegram protocol pusher...")
 
 	// Get configuration for pushers and initialize every connection.
-	cfg := c.Config.GetConfig()
+	cfg := ctx.Config.GetConfig()
 	for name, config := range cfg.Telegram {
-		c.Log.Info().Str("conn", name).Msg("Initializing connection...")
+		ctx.Log.Info().Str("conn", name).Msg("Initializing connection...")
 
-		// nolint:exhaustivestruct
+		// nolint:exhaustruct
 		conn := TelegramConnection{}
 		connections[name] = &conn
 
@@ -42,17 +42,17 @@ func (tp TelegramPusher) Initialize() {
 func (tp TelegramPusher) Push(connection string, data slackmessage.SlackMessage) {
 	conn, found := connections[connection]
 	if !found {
-		c.Log.Error().Str("conn", connection).Msg("Connection not found")
+		ctx.Log.Error().Str("conn", connection).Msg("Connection not found")
 
 		return
 	}
 
-	c.Log.Debug().Str("conn", connection).Msg("Pushing data")
+	ctx.Log.Debug().Str("conn", connection).Msg("Pushing data")
 	conn.ProcessMessage(data)
 }
 
 func (tp TelegramPusher) Shutdown() {
-	c.Log.Info().Msg("Shutting down Telegram pusher...")
+	ctx.Log.Info().Msg("Shutting down Telegram pusher...")
 
 	for _, conn := range connections {
 		conn.Shutdown()
